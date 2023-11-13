@@ -1,5 +1,6 @@
-import tkinter as tk
 import subprocess
+import tkinter as tk
+
 
 class GameInstructions:
     def __init__(self):
@@ -61,7 +62,7 @@ class GameModes:
         exit_button.pack(pady=10)
 
     def human_vs_human(self):
-        subprocess.Popen(['python', 'frontend/NineMensMorris_front_end.py'])
+        subprocess.Popen(['python', 'NineMensMorris_front_end.py'])
         print("Starting Human vs Human Game")
 
     def human_vs_computer(self):
