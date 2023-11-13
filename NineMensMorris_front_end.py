@@ -2,12 +2,11 @@ import sys
 
 import pygame
 
-from backend.NineMensMorris_version7 import Board as Board
-from backend.NineMensMorris_version7 import Game_Functions as Game_Functions
+from NineMensMorris_version7 import Game_Functions as Game_Functions
 
+DEBUG = True
 # Global Variables
-board = Board()
-game_functions = Game_Functions()
+board = Game_Functions()
 pygame.font.init()  # you have to call this at the start, 
                     # if you want to use this module.
 myfont = pygame.font.SysFont('Arial', 18)
@@ -28,12 +27,12 @@ screen = pygame.display.set_mode((600, 750))
 pygame.display.set_caption("Nine Men Morris")
 print("game window initialized")
 # nine mens morris board image 
-boardImg = pygame.image.load('images/morrisbig.png') 
+boardImg = pygame.image.load('morrisbig.png') 
 # avatar images
-leafImg = pygame.image.load('images/player1_30x30.png')
-fireImg = pygame.image.load('images/player2_30x30.png')
-highImg = pygame.image.load('images/high.png')
-roboImg = pygame.image.load('images/robo1.png')
+leafImg = pygame.image.load('player1_30x30.png')
+fireImg = pygame.image.load('player2_30x30.png')
+highImg = pygame.image.load('high.png')
+roboImg = pygame.image.load('robo1.png')
 # coordinates of each board position in Board and corresponding position in the nine mens morris board image
 print("images loaded")
 coords = {
@@ -65,7 +64,8 @@ coords = {
 # coordinates of each clickable position
 # mul = 500 / 843
 # clickables = [pygame.Rect(mul * c[0], mul * c[1], 35, 35) for c in coords.values()]
-clickables = [pygame.Rect(c[0]-20, c[1]-20, 40, 40) for c in coords.values()]
+
+clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in coords.values()]
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -79,6 +79,12 @@ def draw_board(screen, board_img, positions, coords):
         # Draw the background board
         screen.blit(board_img.convert(), (0, 0))
 
+        # Draw boarders around the clickable areas
+        if DEBUG:
+            for rect in clickables:
+                pygame.draw.rect(screen, BLACK, rect, 1)
+            
+
         # Draw the pieces on the board
         for pos, value in enumerate(positions):
             x, y, _, _ = coords[pos]
@@ -89,18 +95,20 @@ def draw_board(screen, board_img, positions, coords):
     except Exception as e:
         print(f"Error drawing the board: {e}")
 
-def draw_game_info(screen, board, gameover):
+
+def draw_game_info(screen, game_functions, gameover):
     # Display the variables from the Board class
     if gameover == True:
         texts = [
-        f"Game Over! Player {2 if board.get_player_turn() == 1 else 1} wins!"
+        f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
     ]
     if gameover == False:    
         texts = [
-            f"Positions: {board.get_positions()}",
-            f"Player Turn: {board.get_player_turn()}",
-            f"Active Mills: {board.get_active_mills()}",
-            f"Remaining Turns: {board.get_remaining_turns()}",
+            f"Positions: {game_functions.get_positions()}",
+            f"Player Turn: {game_functions.get_player_turn()}",
+            f"Active Mills: {game_functions.get_active_mills()}",
+            f"Remaining Turns: {game_functions.get_remaining_turns()}",
+
         ]
 
     for i, text in enumerate(texts):
@@ -144,32 +152,24 @@ def game_loop():
                         if rect.collidepoint(event.pos):
                             print("here1.5")
                             if removepos == True:
-                                        game_functions.form_mill(idx)
-                                        game_functions.check_remove_active_mill()
-                                        board_info = game_functions.set_board_for_gui()                                    
-                                        board.set_active_mills(board_info[2])
+                                        board.form_mill(idx)
+                                        board.check_remove_active_mill()
                                         removepos = False
-                                        game_functions.save_current_state_to_log()
-                                        board_info = game_functions.set_board_for_gui()                                    
-                                        board.set_player_turn(board_info[1])
-                                        board.set_remaining_turns(board_info[3])
+                                        board.save_current_state_to_log()
                                         break
                             if board.get_remaining_turns() != 0:
                                 print("here2")
                                 print(f"Clicked on position: {idx}")
-                                if game_functions.place_piece(idx):  
-                                    game_functions.check_remove_active_mill()
-                                    if game_functions.form_mill_GUI():
+
+                                if board.place_piece(idx):  
+                                    board.check_remove_active_mill()
+                                    if board.form_mill_GUI():
                                         removepos = True
                                         break
-                                    game_functions.save_current_state_to_log()
-                                    board_info = game_functions.set_board_for_gui()                                    
-                                    board.set_positions(board_info[0])
-                                    board.set_remaining_turns(board_info[3])                                    
-                                    board.set_player_turn(board_info[1])
-                                    break                    
+                                    board.save_current_state_to_log()
+                                    break
                             if board.get_remaining_turns() == 0:
-                                    if game_functions.is_game_over():
+                                    if board.is_game_over():
                                         print("Game over!")
                                         print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!") 
                                         gameover = True 
@@ -183,34 +183,31 @@ def game_loop():
                                             break
                                         endpos = idx
                                         print("endpos: ", endpos)
-                                        if game_functions.player_piece_count() == 3:
-                                            if game_functions.fly_piece(startpos, endpos):
-                                                game_functions.check_remove_active_mill()
-                                                if game_functions.form_mill_GUI():
+                                        if board.player_piece_count() == 3:
+                                            if board.fly_piece(startpos, endpos):
+                                                board.check_remove_active_mill()
+                                                if board.form_mill_GUI():
                                                     removepos = True
-                                                    break                                                
-                                                game_functions.save_current_state_to_log()
-                                                board_info = game_functions.set_board_for_gui()                                    
-                                                board.set_positions(board_info[0])
-                                                board.set_active_mills(board_info[2])
-                                                board.set_player_turn(board_info[1])
+                                                    startpos = None
+                                                    endpos = None
+                                                    break
+                                                board.save_current_state_to_log()
                                                 startpos = None
                                                 endpos = None
-                                                break                    
+                                                break
                                             else:
                                                 startpos = None
                                                 endpos = None
                                         else:
-                                            if game_functions.move_piece(startpos, endpos):
-                                                game_functions.check_remove_active_mill()
-                                                if game_functions.form_mill_GUI():
+
+                                            if board.move_piece(startpos, endpos):
+                                                board.check_remove_active_mill()
+                                                if board.form_mill_GUI():
                                                     removepos = True
-                                                    break                                               
-                                                game_functions.save_current_state_to_log()
-                                                board_info = game_functions.set_board_for_gui()                                    
-                                                board.set_positions(board_info[0])
-                                                board.set_active_mills(board_info[2])
-                                                board.set_player_turn(board_info[1])
+                                                    startpos = None
+                                                    endpos = None
+                                                    break
+                                                board.save_current_state_to_log()
                                                 startpos = None
                                                 endpos = None
                                                 break 
@@ -222,7 +219,7 @@ def game_loop():
             print("endpos: ", endpos)
             print("removepos: ", removepos)
             print("board positions: ", board.get_positions())
-            print("board player turn: ", board.get_player_turn())            
+            print("board player turn: ", board.get_player_turn())
                 # Add more event handling logic here for other phases
             print("remaining turns: ", board.get_remaining_turns())
             # Drawing the game state
@@ -244,6 +241,8 @@ def game_loop():
             running = False
 
     print("Exiting game...")
+    # remove temp file
+    board.clean_up()
     pygame.quit()
     sys.exit()
 
