@@ -1,6 +1,7 @@
 import sys
 
 import pygame
+
 from NineMensMorris_version7 import Game_Functions as Game_Functions
 
 DEBUG = True
@@ -63,6 +64,7 @@ coords = {
 # coordinates of each clickable position
 # mul = 500 / 843
 # clickables = [pygame.Rect(mul * c[0], mul * c[1], 35, 35) for c in coords.values()]
+
 clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in coords.values()]
 # Define some colors
 BLACK = (0, 0, 0)
@@ -76,11 +78,13 @@ def draw_board(screen, board_img, positions, coords):
     try:
         # Draw the background board
         screen.blit(board_img.convert(), (0, 0))
+
         # Draw boarders around the clickable areas
         if DEBUG:
             for rect in clickables:
                 pygame.draw.rect(screen, BLACK, rect, 1)
             
+
         # Draw the pieces on the board
         for pos, value in enumerate(positions):
             x, y, _, _ = coords[pos]
@@ -152,6 +156,7 @@ def game_loop():
                             if board.get_remaining_turns() != 0:
                                 print("here2")
                                 print(f"Clicked on position: {idx}")
+
                                 if board.place_piece(idx):  
                                     board.check_remove_active_mill()
                                     if board.form_mill_GUI():
@@ -190,6 +195,7 @@ def game_loop():
                                                 startpos = None
                                                 endpos = None
                                         else:
+
                                             if board.move_piece(startpos, endpos):
                                                 board.check_remove_active_mill()
                                                 if board.form_mill_GUI():
