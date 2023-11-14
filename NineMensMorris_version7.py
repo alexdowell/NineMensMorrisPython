@@ -95,48 +95,7 @@ class Game_Functions(Board):
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
-
-    def printBoard(self):
-        board = [' ' if piece == 0 else '1' if piece == 1 else '2' for piece in self.get_positions()]
-        print(board[0] + "(00)----------------------" + board[1] +
-            "(01)----------------------" + board[2] + "(02)")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|       " + board[8] + "(08)--------------" +
-            board[9] + "(09)--------------" + board[10] + "(10)     |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |        " + board[16] + "(16)-----" +
-            board[17] + "(17)-----" + board[18] + "(18)       |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print(board[3] + "(03)---" + board[11] + "(11)----" + board[19] + "(19)               " +
-            board[20] + "(20)----" + board[12] + "(12)---" + board[4] + "(04)")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |        " + board[21] + "(21)-----" +
-            board[22] + "(22)-----" + board[23] + "(23)       |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       " + board[13] + "(13)--------------" +
-            board[14] + "(14)--------------" + board[15] + "(15)     |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print(board[5] + "(05)----------------------" + board[6] +
-            "(06)----------------------" + board[7] + "(07)")
-        print("\n")
-        print(f"Player {self.get_player_turn()}'s turn.")
-        print(f"Player 1 pieces: {self.get_positions().count(1)}")
-        print(f"Player 2 pieces: {self.get_positions().count(2)}")
-        print(f"Remaining turns: {self.get_remaining_turns()}")
-        print(f"Active mills: {self.get_active_mills()}")
-
+    
     def set_board_for_gui(self):
         board_info = [self.get_positions(), self.get_player_turn(), self.get_active_mills(), self.get_remaining_turns()]
         return board_info
@@ -353,10 +312,7 @@ class Game_Functions(Board):
         self.set_active_mills(state['active_mills'])
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
-
-        self.printBoard()
         print("Board state loaded from log.")
-        self.play_game()  # This will continue the game from the loaded state.
 
     def replay(self):
         if not os.path.exists(self.TEMP_LOG_PATH):
@@ -435,13 +391,6 @@ class Game_Functions(Board):
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-        self.printBoard()
-        self.play_game()
-
-    def play_game(self):
-        self.place_a_piece_phase()
-        self.move_a_piece_phase()
-        print(f"Player {self.get_player_turn()} wins!")
 
     def cleanup(self):
         if os.path.exists(self.TEMP_LOG_PATH):

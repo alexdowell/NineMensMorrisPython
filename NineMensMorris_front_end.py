@@ -91,18 +91,18 @@ def draw_board(screen, board_img, positions, coords):
     except Exception as e:
         print(f"Error drawing the board: {e}")
 
-def draw_game_info(screen, game_functions, gameover):
+def draw_game_info(screen, board, gameover):
     # Display the variables from the Board class
     if gameover == True:
         texts = [
-        f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
+        f"Game Over! Player {2 if board.get_player_turn() == 1 else 1} wins!"
     ]
     if gameover == False:    
         texts = [
-            f"Positions: {game_functions.get_positions()}",
-            f"Player Turn: {game_functions.get_player_turn()}",
-            f"Active Mills: {game_functions.get_active_mills()}",
-            f"Remaining Turns: {game_functions.get_remaining_turns()}",
+            f"Positions: {board.get_positions()}",
+            f"Player Turn: {board.get_player_turn()}",
+            f"Active Mills: {board.get_active_mills()}",
+            f"Remaining Turns: {board.get_remaining_turns()}",
         ]
 
     for i, text in enumerate(texts):
@@ -124,14 +124,12 @@ def game_loop():
     while running:
         try:
             # Event handling
-            
             for event in pygame.event.get():
                 print(f"Event: {event}")  # This will print out each event captured
                 if event.type == pygame.QUIT:
                     print("Quit event detected. Closing game window...")
                     running = False
                     break
-                    
                 print("event.type: ", event.type)
                 print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -234,7 +232,7 @@ def game_loop():
 
     print("Exiting game...")
     # remove temp file
-    board.clean_up()
+    board.cleanup()
 
     pygame.quit()
     sys.exit()

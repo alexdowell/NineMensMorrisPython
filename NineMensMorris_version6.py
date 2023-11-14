@@ -38,7 +38,9 @@ class Board:
         21: [19, 22],
         22: [14, 21, 23],
         23: [20, 22]
-        }
+    }
+        
+    
 
     # Getter for positions
     def get_positions(self):
@@ -95,47 +97,6 @@ class Game_Functions(Board):
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
-
-    def printBoard(self):
-        board = [' ' if piece == 0 else '1' if piece == 1 else '2' for piece in self.get_positions()]
-        print(board[0] + "(00)----------------------" + board[1] +
-            "(01)----------------------" + board[2] + "(02)")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|       " + board[8] + "(08)--------------" +
-            board[9] + "(09)--------------" + board[10] + "(10)     |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |        " + board[16] + "(16)-----" +
-            board[17] + "(17)-----" + board[18] + "(18)       |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print(board[3] + "(03)---" + board[11] + "(11)----" + board[19] + "(19)               " +
-            board[20] + "(20)----" + board[12] + "(12)---" + board[4] + "(04)")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |         |                   |          |      |")
-        print("|       |        " + board[21] + "(21)-----" +
-            board[22] + "(22)-----" + board[23] + "(23)       |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       |                   |                    |      |")
-        print("|       " + board[13] + "(13)--------------" +
-            board[14] + "(14)--------------" + board[15] + "(15)     |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print("|                           |                           |")
-        print(board[5] + "(05)----------------------" + board[6] +
-            "(06)----------------------" + board[7] + "(07)")
-        print("\n")
-        print(f"Player {self.get_player_turn()}'s turn.")
-        print(f"Player 1 pieces: {self.get_positions().count(1)}")
-        print(f"Player 2 pieces: {self.get_positions().count(2)}")
-        print(f"Remaining turns: {self.get_remaining_turns()}")
-        print(f"Active mills: {self.get_active_mills()}")
 
     def is_occupied(self, position):
         return self.get_positions()[position] != 0
@@ -246,19 +207,6 @@ class Game_Functions(Board):
         print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         exit()
 
-    def start_menu(self):
-        choice = input("Select: 1. New/Restart Game 2. Load Game 3. Game Type (default is 9): ")
-        if choice == '1':
-            self.new_restart_game()
-        elif choice == '2':
-            self.load()
-        elif choice == '3':
-            print("Currently, only Nine Men's Morris (9) is supported.")
-            self.new_restart_game()
-        else:
-            print("Invalid choice.")
-            self.start_menu()
-
     def save_current_state_to_log(self):
         state = {
             'positions': copy.deepcopy(self.get_positions()),
@@ -322,9 +270,7 @@ class Game_Functions(Board):
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
 
-        self.printBoard()
         print("Board state loaded from log.")
-        self.play_game()  # This will continue the game from the loaded state.
 
     def replay(self):
         if not os.path.exists(self.TEMP_LOG_PATH):
@@ -391,75 +337,6 @@ class Game_Functions(Board):
         self.set_permissible_moves(current_state['permissible_moves'])
 
 
-    def place_a_piece_phase(self):
-        while self.get_remaining_turns() > 0:
-            self.printBoard()
-            try:
-                position = int(input(f"Player {self.get_player_turn()}, enter a position (0-23), 24 to Load, 25 to Save, 26 to Restart, 27 to Replay or 28 to access main menu: "))
-                
-                if position == 24:
-                    self.load()
-                elif position == 25:
-                    self.save()
-                elif position == 26:
-                    self.new_restart_game()
-                elif position == 27:
-                    self.replay()
-                elif position == 28:
-                    self.start_menu()
-                elif self.place_piece(position):
-                    self.set_remaining_turns(self.get_remaining_turns() - 1)
-                    self.save_current_state_to_log()
-                else:
-                    print("Invalid move. Try again.")
-            except ValueError:
-                print("Invalid input. Try again.")
-
-    def move_a_piece_phase(self):
-        while not self.is_game_over():
-            self.printBoard()
-            try:
-                if self.player_piece_count() == 3:
-                    current_position = int(input(f"Player {self.get_player_turn()}, select a piece to fly (0-23), 24 to Load, 25 to Save, 26 to Restart, 27 to Replay or 28 to access main menu: "))
-                else:
-                    current_position = int(input(f"Player {self.get_player_turn()}, select a piece to move (0-23), 24 to Load, 25 to Save, 26 to Restart, 27 to Replay or 28 to access main menu: "))
-                
-                if current_position == 24:
-                    self.load()
-                elif current_position == 25:
-                    self.save()
-                elif current_position == 26:
-                    self.new_restart_game()
-                elif current_position == 27:
-                    self.replay()
-                elif current_position == 28:
-                    self.start_menu()
-                else:
-                    if self.player_piece_count() == 3:
-                        # if player is in fly phase then assign input to move_to
-                        move_to = int(input(f"Select where to fly your piece: " ))
-                    else:
-                        move_to = int(input(f"Select where to move your piece {self.get_permissible_moves()[current_position]}: "))
-                    
-                    # Check if the player can fly their piece
-                    # print the current player's piece count
-                    print(f"Player {self.get_player_turn()} has {self.player_piece_count()} pieces left.")
-                    if self.player_piece_count() == 3:
-                        if not self.fly_piece(current_position, move_to):
-                            print("Invalid move. Try again.")
-                    else:
-                        if not self.move_piece(current_position, move_to):
-                            print("Invalid move. Try again.")
-                            # Check game over condition after a move
-                    self.save_current_state_to_log()
-                if self.is_game_over():
-                    print(f"Player {2 if self.get_player_turn() == 1 else 1} wins!")  # The opponent wins.
-                    self.start_menu()
-                    return
-            except ValueError:
-                print("Invalid input. Try again.")
-
-
     def new_restart_game(self):
         self.set_positions([0] * 24)
         self.set_player_turn(1)
@@ -468,13 +345,6 @@ class Game_Functions(Board):
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-        self.printBoard()
-        self.play_game()
-
-    def play_game(self):
-        self.place_a_piece_phase()
-        self.move_a_piece_phase()
-        print(f"Player {self.get_player_turn()} wins!")
 
     def cleanup(self):
         if os.path.exists(self.TEMP_LOG_PATH):
