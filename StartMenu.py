@@ -1,5 +1,7 @@
 import subprocess
 import tkinter as tk
+from tkinter import messagebox
+from NineMensMorris_version7 import Game_Functions
 
 
 class GameInstructions:
@@ -40,30 +42,39 @@ class GameInstructions:
 
 class GameModes:
     def __init__(self):
+        self.game = Game_Functions()
         self.window = tk.Tk()
         self.window.title("Game Modes")
         self.window.geometry("800x600")
         self.window.configure(background="yellow")
 
-        font_large = ("Arial", 24)
+        self.font_large = ("Arial", 24)
 
-        button_width = 15  # Set a common width for all buttons
+        self.button_width = 15  # Set a common width for all buttons
 
-        button1 = tk.Button(self.window, text="Human vs Human", font=font_large, bg="pink", command=self.human_vs_human, width=button_width)
-        button2 = tk.Button(self.window, text="Human vs Computer", font=font_large, bg="#CCCCFF", command=self.human_vs_computer, width=button_width)
-        button3 = tk.Button(self.window, text="Nine Men's Morris", font=font_large, bg="#CCFFCC", command=self.nine_mens_morris, width=button_width)
-        exit_button = tk.Button(self.window, text="Exit", font=font_large, bg="red", command=self.window.destroy, width=button_width)
-        rules_button = tk.Button(self.window, text="Rules", font=font_large, bg="orange", command=self.show_game_instructions, width=button_width)
+        self.button1 = tk.Button(self.window, text="Human vs Human", font=self.font_large, bg="pink", command=self.human_vs_human, width=self.button_width)
+        self.button2 = tk.Button(self.window, text="Human vs Computer", font=self.font_large, bg="#CCCCFF", command=self.human_vs_computer, width=self.button_width)
+        self.button3 = tk.Button(self.window, text="Nine Men's Morris", font=self.font_large, bg="#CCFFCC", command=self.nine_mens_morris, width=self.button_width)
+        self.board_size_label = tk.Label(self.window, text="Board Size: ", font=self.font_large)
+        self.board_size_field = tk.Entry(self.window, font=self.font_large, width=15)
+        self.exit_button = tk.Button(self.window, text="Exit", font=self.font_large, bg="red", command=self.window.destroy, width=self.button_width)
+        self.rules_button = tk.Button(self.window, text="Rules", font=self.font_large, bg="orange", command=self.show_game_instructions, width=self.button_width)
 
-        button1.pack(pady=10)
-        button2.pack(pady=10)
-        button3.pack(pady=10)
-        rules_button.pack(pady=10)
-        exit_button.pack(pady=10)
+        self.button1.pack(pady=10)
+        self.button2.pack(pady=10)
+        self.button3.pack(pady=10)
+        self.board_size_label.pack(pady=10)
+        self.board_size_field.pack(pady=10)
+        self.rules_button.pack(pady=10)
+        self.exit_button.pack(pady=10)
 
     def human_vs_human(self):
-        subprocess.Popen(['python', 'NineMensMorris_front_end.py'])
-        print("Starting Human vs Human Game")
+        if(self.game.set_board_size(int(self.board_size_field.get()))):
+            subprocess.Popen(['python', 'NineMensMorris_front_end.py'])
+            print("Starting Human vs Human Game")
+        else:
+            messagebox.showerror("Error", "Invalid Board Size. Please enter either 3, 6, or 9.")
+
 
     def human_vs_computer(self):
         print("Starting Human vs Computer Game")

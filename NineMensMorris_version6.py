@@ -40,7 +40,11 @@ class Board:
         23: [20, 22]
     }
         
+    def get_board_size(self):
+        return self.__board_size
     
+    def set_board_size(self, board_size):
+        self.__board_size = board_size
 
     # Getter for positions
     def get_positions(self):
@@ -49,6 +53,7 @@ class Board:
     # Setter for positions
     def set_positions(self, positions):
         self.__positions = positions
+        
 
     # Getter for player_turn
     def get_player_turn(self):

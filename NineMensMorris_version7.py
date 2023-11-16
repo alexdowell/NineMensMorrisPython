@@ -9,6 +9,7 @@ import time
 
 class Board:
     def __init__(self):
+        self.__board_size = None
         self.__positions = [0] * 24
         self.__player_turn = 1
         self.__active_mills = []
@@ -38,12 +39,31 @@ class Board:
         21: [19, 22],
         22: [14, 21, 23],
         23: [20, 22]
-        }
+    }
+    # Setter for board size
+    def set_board_size(self, board_size):
+        if(board_size == 3 or board_size == 6 or board_size == 9):
+            self.__board_size = board_size
+            return True
+        else:
+            return False
+            
+    # Getter for board size
+    def get_board_size(self):
+        return self.__board_size
 
     # Getter for positions
     def get_positions(self):
         return self.__positions
-
+    
+    # Setter for different positions
+    def set_positions_diff(self):
+        if(self.get_board_size() == 3):
+            self.__positions = [0] * 9
+        elif(self.get_board_size() == 6):
+            self.__positions = [0] * 16
+        elif(self.get_board_size() == 9):
+            self.__positions = [0] * 24
     # Setter for positions
     def set_positions(self, positions):
         self.__positions = positions
@@ -67,6 +87,15 @@ class Board:
     # Getter for remaining_turns
     def get_remaining_turns(self):
         return self.__remaining_turns
+    
+    # Setter for different remaining turns
+    def set_remaining_turns_diff(self):
+        if(self.get_board_size() == 3):
+            self.__remaining_turns = 6
+        elif(self.get_board_size() == 6):
+            self.__remaining_turns = 12
+        elif(self.get_board_size() == 9):
+            self.__remaining_turns = 18
 
     # Setter for remaining_turns
     def set_remaining_turns(self, remaining_turns):
@@ -76,6 +105,68 @@ class Board:
     def get_permissible_moves(self):
         return self.__permissible_moves
     
+    # Setter for different remaining turns
+    def set_permissible_moves_diff(self):
+        if(self.get_board_size() == 3):
+            self.__permissible_moves = {
+                0: [1, 3, 4],
+                1: [0, 2, 4],
+                2: [1, 4, 5],
+                3: [0, 4, 6],
+                4: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                5: [2, 4, 8],
+                6: [3, 4, 7],
+                7: [4, 6, 8],
+                8: [4, 5, 7]
+            }
+        elif(self.get_board_size() == 6):
+            self.__permissible_moves = {
+                0: [1, 6],
+                1: [0, 2, 4],
+                2: [1, 9],
+                3: [4, 7],
+                4: [1, 3, 5],
+                5: [4, 8],
+                6: [0, 7, 13],
+                7: [3, 6, 10],
+                8: [5, 9, 12],
+                9: [2, 8, 15],
+                10: [7, 11],
+                11: [10, 12, 14],
+                12: [8, 11],
+                13: [6, 14],
+                14: [11, 13, 15],
+                15: [9, 14]
+            }
+        elif(self.get_board_size() == 9):
+            self.__permissible_moves = {
+                0: [1, 3],
+                1: [0, 2, 9],
+                2: [1, 4],
+                3: [0, 11, 5],
+                4: [2, 12, 7],
+                5: [3, 6],
+                6: [5, 7, 14],
+                7: [4, 6],
+                8: [9, 11],
+                9: [1, 8, 17, 10],
+                10: [9, 12],
+                11: [8, 3, 19, 13],
+                12: [20, 10, 4, 15],
+                13: [11, 14],
+                14: [13, 22, 6, 15],
+                15: [14, 12],
+                16: [19, 17],
+                17: [16, 18, 9],
+                18: [17, 20],
+                19: [16, 11, 21],
+                20: [18, 12, 23],
+                21: [19, 22],
+                22: [14, 21, 23],
+                23: [20, 22]
+            }
+    
+    # Setter for permissible moves
     def set_permissible_moves(self, permissible_moves):
         self.__permissible_moves = permissible_moves
 
@@ -114,9 +205,6 @@ class Game_Functions(Board):
         if 0 <= position <= 23:
             if not self.is_occupied(position):
                 self.get_positions()[position] = self.get_player_turn()
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 self.set_remaining_turns(self.get_remaining_turns() - 1)
                 return True
         return False
@@ -126,9 +214,6 @@ class Game_Functions(Board):
             if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 return True
         return False
 
@@ -147,11 +232,44 @@ class Game_Functions(Board):
             if self.is_occupied(current_position) and self.is_current_player(current_position) and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 return True
         return False
+    
+    def form_mill_diff(self, position):
+        mill_combinations = []
+        if(self.get_board_size() == 3):
+            mill_combinations = [
+            [0, 1, 2], [0, 4, 8], [0, 3, 6],
+            [1, 4, 7], [2, 4, 6], [2, 5, 8],
+            [6, 7, 8]
+            ]
+        elif(self.get_board_size == 6):
+            mill_combinations = [
+            [0, 1, 2], [0, 6, 13], [2, 9, 15],
+            [3, 4, 5], [3, 7, 10], [5, 8, 12],
+            [10, 11, 12], [13, 14, 15]
+            ]
+        elif(self.get_board_size == 9):
+            mill_combinations = [
+            [0, 1, 2], [2, 4, 7], [5, 6, 7],
+            [0, 3, 5], [8, 9, 10], [10, 12, 15],
+            [13, 14, 15], [8, 11, 13],
+            [16, 17, 18], [18, 20, 23], [21, 22, 23],
+            [16, 19, 21], [1, 9, 17], [20, 12, 4],
+            [22, 14, 6], [3, 11, 19]
+            ]
+        
+        newly_formed_mills = []
+        for combo in mill_combinations:
+            if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
+                if combo not in self.get_active_mills():
+                    newly_formed_mills.append(combo)
+        if newly_formed_mills and (self.get_board_size() == 6 or self.get_board_size() == 9):
+            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+            self.remove_piece(position)
+        elif newly_formed_mills and self.get_board_size() == 3:
+            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+            self.is_game_over_diff()
 
     def form_mill(self, position):
         mill_combinations = [
@@ -172,26 +290,31 @@ class Game_Functions(Board):
         if newly_formed_mills:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
             self.remove_piece(position)
-            # # Ask the player to remove a piece due to the formed mill
-            # remove_piece = input(f"Player {self.get_player_turn()} formed a mill! Do you want to remove an opponent's piece? (yes/no) ")    
-        #     while True:
-        #     position_to_remove = int(input("A mill was formed! Choose an opponent's piece to remove (0-23): "))
-        #     if self.remove_piece(position_to_remove):
-        #         break
-        #     else:
-        #         print("Invalid position. Try again.")
-        # except ValueError:
-        #             print("Invalid input. Try again.")
+
 
     def form_mill_GUI(self):
-        mill_combinations = [
-        [0, 1, 2], [2, 4, 7], [5, 6, 7],
-        [0, 3, 5], [8, 9, 10], [10, 12, 15],
-        [13, 14, 15], [8, 11, 13],
-        [16, 17, 18], [18, 20, 23], [21, 22, 23],
-        [16, 19, 21], [1, 9, 17], [20, 12, 4],
-        [22, 14, 6], [3, 11, 19]
-        ]
+        mill_combinations = []
+        if(self.get_board_size() == 3):
+            mill_combinations = [
+            [0, 1, 2], [0, 4, 8], [0, 3, 6],
+            [1, 4, 7], [2, 4, 6], [2, 5, 8],
+            [6, 7, 8]
+            ]
+        elif(self.get_board_size == 6):
+            mill_combinations = [
+            [0, 1, 2], [0, 6, 13], [2, 9, 15],
+            [3, 4, 5], [3, 7, 10], [5, 8, 12],
+            [10, 11, 12], [13, 14, 15]
+            ]
+        elif(self.get_board_size == 9):
+            mill_combinations = [
+            [0, 1, 2], [2, 4, 7], [5, 6, 7],
+            [0, 3, 5], [8, 9, 10], [10, 12, 15],
+            [13, 14, 15], [8, 11, 13],
+            [16, 17, 18], [18, 20, 23], [21, 22, 23],
+            [16, 19, 21], [1, 9, 17], [20, 12, 4],
+            [22, 14, 6], [3, 11, 19]
+            ]
         newly_formed_mills = []
         print("backend positions:", self.get_positions())
         print("backend player turn:", self.get_player_turn())
@@ -202,6 +325,7 @@ class Game_Functions(Board):
                     print("newly formed mill:", combo)
                     newly_formed_mills.append(combo)
                     return True
+
     def opposite_player_turn(self):
         if self.get_player_turn() == 1:
             return 2
@@ -217,6 +341,14 @@ class Game_Functions(Board):
 
         for mill in mills_to_remove:
             self.get_active_mills().remove(mill)
+    
+    def is_game_over_diff(self):
+        if(self.get_board_size() == 6 or self.get_board_size() == 9):
+            current_player_pieces = self.get_positions().count(self.get_player_turn())
+            return current_player_pieces <= 2
+        elif(self.get_board_size() == 3):
+            return self.get_active_mills()[0][0] == self.get_player_turn() and self.get_active_mills()[0][1] == self.get_player_turn() and self.get_active_mills()[0][2] == self.get_player_turn()
+
 
     def is_game_over(self):
         current_player_pieces = self.get_positions().count(self.get_player_turn())
@@ -345,8 +477,6 @@ class Game_Functions(Board):
             self.set_active_mills(state['active_mills'])
             self.set_remaining_turns(state['remaining_turns'])
             self.set_permissible_moves(state['permissible_moves'])
-            self.printBoard()
-
             choice = input("\n1. Next move\n2. Previous move\n3. Auto replay\n4. Exit replay\nChoose an option: ")
 
             if choice == '1':
@@ -362,7 +492,6 @@ class Game_Functions(Board):
                     self.set_active_mills(state['active_mills'])
                     self.set_remaining_turns(state['remaining_turns'])
                     self.set_permissible_moves(state['permissible_moves'])
-                    self.printBoard()
                     time.sleep(delay)
                 break
             elif choice == '4':
@@ -377,33 +506,36 @@ class Game_Functions(Board):
         self.set_active_mills(current_state['active_mills'])
         self.set_remaining_turns(current_state['remaining_turns'])
         self.set_permissible_moves(current_state['permissible_moves'])
+    
 
 
-
-
-
-
-    def new_restart_game(self):
-        self.set_positions([0] * 24)
+'''
+def new_restart_game_diff(self, board_size):
+    if(self.set_board_size(board_size) and os.path.exists(self.TEMP_LOG_PATH)):
+        self.set_positions_diff()
         self.set_player_turn(1)
         self.set_active_mills([])
-        self.set_remaining_turns(18)
-        if os.path.exists(self.TEMP_LOG_PATH):
-            os.remove(self.TEMP_LOG_PATH)
+        self.set_remaining_turns_diff()
+        os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
+        return True
+    else:
+        return False
+'''
+def new_restart_game(self):
+    self.set_positions([0] * 24)
+    self.set_player_turn(1)
+    self.set_active_mills([])
+    self.set_remaining_turns(18)
+    if os.path.exists(self.TEMP_LOG_PATH):
+        os.remove(self.TEMP_LOG_PATH)
+    self.__temp_log = []  # clear the in-memory log
 
-    def cleanup(self):
-        if os.path.exists(self.TEMP_LOG_PATH):
-            os.remove(self.TEMP_LOG_PATH)
+def cleanup(self):
+    if os.path.exists(self.TEMP_LOG_PATH):
+        os.remove(self.TEMP_LOG_PATH)
 
-    def signal_handler(self, signal, frame):
-        #self.cleanup()
-        print("\nGame exited, temporary log cleared.")
-        sys.exit(0)
-
-def main():
-    game = Game_Functions()  # Create a Game_Functions object.
-    game.start_menu()  # Start the game with the main menu.
-
-if __name__ == "__main__":
-    main()
+def signal_handler(self, signal, frame):
+    #self.cleanup()
+    print("\nGame exited, temporary log cleared.")
+    sys.exit(0)

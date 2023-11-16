@@ -26,8 +26,10 @@ screen = pygame.display.set_mode((600, 750))
 
 pygame.display.set_caption("Nine Men Morris")
 print("game window initialized")
-# nine mens morris board image 
-boardImg = pygame.image.load('morrisbig.png') 
+# nine mens morris board images (3 mens, 6 mens, 9 mens)
+boardImg3 = pygame.image.load('3mens.png')
+boardImg9 = pygame.image.load('morrisbig.png')
+
 # avatar images
 leafImg = pygame.image.load('player1_30x30.png')
 fireImg = pygame.image.load('player2_30x30.png')
@@ -221,7 +223,7 @@ def game_loop():
             # Drawing the game state
             print("Calling draw_board()...")
             screen.fill(WHITE)
-            draw_board(screen, boardImg, board.get_positions(), coords)
+            draw_board(screen, boardImg9, board.get_positions(), coords)
             
             print("Calling draw_game_info()...")
             draw_game_info(screen, board, gameover)
