@@ -172,25 +172,21 @@ class Board:
 
 class Game_Functions(Board):
     TEMP_LOG_PATH = "temp_log.pkl"
-    SAVED_LOG_PATH = "board_log.pkl"  
+    SAVED_LOG_PATH = "board_log.pkl"
     def __init__(self):
         super().__init__()
         # Add this new member for the in-memory log
         self.__temp_log = []
 
         # Handle exit events
-        #atexit.register(self.cleanup)
-        #signal.signal(signal.SIGINT, self.signal_handler)
+        atexit.register(self.cleanup)
+        signal.signal(signal.SIGINT, self.signal_handler)
         
         # check if log exists or create an empty one
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
-    
-    def set_board_for_gui(self):
-        board_info = [self.get_positions(), self.get_player_turn(), self.get_active_mills(), self.get_remaining_turns()]
-        return board_info
-    
+
     def is_occupied(self, position):
         return self.get_positions()[position] != 0
 
@@ -224,6 +220,7 @@ class Game_Functions(Board):
         if 0 <= position <= 23:
             if self.is_occupied(position) and not self.is_current_player(position):
                 self.get_positions()[position] = 0
+                print("piece removed")
                 return True
         return False
 
@@ -288,9 +285,9 @@ class Game_Functions(Board):
                     newly_formed_mills.append(combo)
 
         if newly_formed_mills:
-            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-            self.remove_piece(position)
-
+            if self.remove_piece(position):
+                self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+                return True
 
     def form_mill_GUI(self):
         mill_combinations = []
@@ -331,6 +328,7 @@ class Game_Functions(Board):
             return 2
         else:
             return 1
+
     def check_remove_active_mill(self):
         mills_to_remove = []
 
@@ -444,83 +442,19 @@ class Game_Functions(Board):
         self.set_active_mills(state['active_mills'])
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
+
+        self.printBoard()
         print("Board state loaded from log.")
+        self.play_game()  # This will continue the game from the loaded state.
 
-    def replay(self):
-        if not os.path.exists(self.TEMP_LOG_PATH):
-            print("No saved game states to replay.")
-            return
-
-        with open(self.TEMP_LOG_PATH, "rb") as file:
-            log = pickle.load(file)
-
-        if not log:
-            print("Log is empty. Nothing to replay.")
-            return
-
-        # Save current state
-        current_state = {
-            'positions': self.get_positions(),
-            'player_turn': self.get_player_turn(),
-            'active_mills': self.get_active_mills(),
-            'remaining_turns': self.get_remaining_turns(),
-            'permissible_moves': self.get_permissible_moves()
-        }
-
-        index = 0
-        while index < len(log):
-            state = log[index]
-
-            # Load state from log and display it
-            self.set_positions(state['positions'])
-            self.set_player_turn(state['player_turn'])
-            self.set_active_mills(state['active_mills'])
-            self.set_remaining_turns(state['remaining_turns'])
-            self.set_permissible_moves(state['permissible_moves'])
-            choice = input("\n1. Next move\n2. Previous move\n3. Auto replay\n4. Exit replay\nChoose an option: ")
-
-            if choice == '1':
-                index += 1
-            elif choice == '2':
-                index -= 1
-            elif choice == '3':
-                delay = float(input("Enter the delay between moves in seconds: "))
-                for remaining_index in range(index, len(log)):
-                    state = log[remaining_index]
-                    self.set_positions(state['positions'])
-                    self.set_player_turn(state['player_turn'])
-                    self.set_active_mills(state['active_mills'])
-                    self.set_remaining_turns(state['remaining_turns'])
-                    self.set_permissible_moves(state['permissible_moves'])
-                    time.sleep(delay)
-                break
-            elif choice == '4':
-                break
-
-            # Bound the index to the available range
-            index = max(0, min(index, len(log) - 1))
-
-        # Restore the current state after exiting replay
-        self.set_positions(current_state['positions'])
-        self.set_player_turn(current_state['player_turn'])
-        self.set_active_mills(current_state['active_mills'])
-        self.set_remaining_turns(current_state['remaining_turns'])
-        self.set_permissible_moves(current_state['permissible_moves'])
-    
-
-
-'''
-def new_restart_game_diff(self, board_size):
-    if(self.set_board_size(board_size) and os.path.exists(self.TEMP_LOG_PATH)):
-        self.set_positions_diff()
+    def new_restart_game(self):
+        self.set_positions([0] * 24)
         self.set_player_turn(1)
         self.set_active_mills([])
         self.set_remaining_turns_diff()
         os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-        return True
-    else:
-        return False
+
 '''
 def new_restart_game(self):
     self.set_positions([0] * 24)
@@ -531,11 +465,19 @@ def new_restart_game(self):
         os.remove(self.TEMP_LOG_PATH)
     self.__temp_log = []  # clear the in-memory log
 
-def cleanup(self):
-    if os.path.exists(self.TEMP_LOG_PATH):
-        os.remove(self.TEMP_LOG_PATH)
+    def cleanup(self):
+        if os.path.exists(self.TEMP_LOG_PATH):
+            print("\nGame exited, temporary log cleared.")
+            os.remove(self.TEMP_LOG_PATH)
 
-def signal_handler(self, signal, frame):
-    #self.cleanup()
-    print("\nGame exited, temporary log cleared.")
-    sys.exit(0)
+    def signal_handler(self, signal, frame):
+        self.cleanup()
+        sys.exit(0)
+
+def main():
+    game = Game_Functions()  # Create a Game_Functions object.
+    game.start_menu()  # Start the game with the main menu.
+
+if __name__ == "__main__":
+    main()
+'''
