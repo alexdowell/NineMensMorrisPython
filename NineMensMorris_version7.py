@@ -81,25 +81,21 @@ class Board:
 
 class Game_Functions(Board):
     TEMP_LOG_PATH = "temp_log.pkl"
-    SAVED_LOG_PATH = "board_log.pkl"  
+    SAVED_LOG_PATH = "board_log.pkl"
     def __init__(self):
         super().__init__()
         # Add this new member for the in-memory log
         self.__temp_log = []
 
         # Handle exit events
-        #atexit.register(self.cleanup)
-        #signal.signal(signal.SIGINT, self.signal_handler)
+        atexit.register(self.cleanup)
+        signal.signal(signal.SIGINT, self.signal_handler)
         
         # check if log exists or create an empty one
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
-    
-    def set_board_for_gui(self):
-        board_info = [self.get_positions(), self.get_player_turn(), self.get_active_mills(), self.get_remaining_turns()]
-        return board_info
-    
+
     def is_occupied(self, position):
         return self.get_positions()[position] != 0
 
@@ -114,9 +110,6 @@ class Game_Functions(Board):
         if 0 <= position <= 23:
             if not self.is_occupied(position):
                 self.get_positions()[position] = self.get_player_turn()
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 self.set_remaining_turns(self.get_remaining_turns() - 1)
                 return True
         return False
@@ -126,9 +119,6 @@ class Game_Functions(Board):
             if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 return True
         return False
 
@@ -139,6 +129,7 @@ class Game_Functions(Board):
         if 0 <= position <= 23:
             if self.is_occupied(position) and not self.is_current_player(position):
                 self.get_positions()[position] = 0
+                print("piece removed")
                 return True
         return False
 
@@ -147,9 +138,6 @@ class Game_Functions(Board):
             if self.is_occupied(current_position) and self.is_current_player(current_position) and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
-                #self.form_mill()
-                #self.check_remove_active_mill()
-                #self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
                 return True
         return False
 
@@ -170,18 +158,9 @@ class Game_Functions(Board):
                     newly_formed_mills.append(combo)
 
         if newly_formed_mills:
-            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-            self.remove_piece(position)
-            # # Ask the player to remove a piece due to the formed mill
-            # remove_piece = input(f"Player {self.get_player_turn()} formed a mill! Do you want to remove an opponent's piece? (yes/no) ")    
-        #     while True:
-        #     position_to_remove = int(input("A mill was formed! Choose an opponent's piece to remove (0-23): "))
-        #     if self.remove_piece(position_to_remove):
-        #         break
-        #     else:
-        #         print("Invalid position. Try again.")
-        # except ValueError:
-        #             print("Invalid input. Try again.")
+            if self.remove_piece(position):
+                self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+                return True
 
     def form_mill_GUI(self):
         mill_combinations = [
@@ -202,11 +181,13 @@ class Game_Functions(Board):
                     print("newly formed mill:", combo)
                     newly_formed_mills.append(combo)
                     return True
+
     def opposite_player_turn(self):
         if self.get_player_turn() == 1:
             return 2
         else:
             return 1
+
     def check_remove_active_mill(self):
         mills_to_remove = []
 
@@ -312,76 +293,10 @@ class Game_Functions(Board):
         self.set_active_mills(state['active_mills'])
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
+
+        self.printBoard()
         print("Board state loaded from log.")
-
-    def replay(self):
-        if not os.path.exists(self.TEMP_LOG_PATH):
-            print("No saved game states to replay.")
-            return
-
-        with open(self.TEMP_LOG_PATH, "rb") as file:
-            log = pickle.load(file)
-
-        if not log:
-            print("Log is empty. Nothing to replay.")
-            return
-
-        # Save current state
-        current_state = {
-            'positions': self.get_positions(),
-            'player_turn': self.get_player_turn(),
-            'active_mills': self.get_active_mills(),
-            'remaining_turns': self.get_remaining_turns(),
-            'permissible_moves': self.get_permissible_moves()
-        }
-
-        index = 0
-        while index < len(log):
-            state = log[index]
-
-            # Load state from log and display it
-            self.set_positions(state['positions'])
-            self.set_player_turn(state['player_turn'])
-            self.set_active_mills(state['active_mills'])
-            self.set_remaining_turns(state['remaining_turns'])
-            self.set_permissible_moves(state['permissible_moves'])
-            self.printBoard()
-
-            choice = input("\n1. Next move\n2. Previous move\n3. Auto replay\n4. Exit replay\nChoose an option: ")
-
-            if choice == '1':
-                index += 1
-            elif choice == '2':
-                index -= 1
-            elif choice == '3':
-                delay = float(input("Enter the delay between moves in seconds: "))
-                for remaining_index in range(index, len(log)):
-                    state = log[remaining_index]
-                    self.set_positions(state['positions'])
-                    self.set_player_turn(state['player_turn'])
-                    self.set_active_mills(state['active_mills'])
-                    self.set_remaining_turns(state['remaining_turns'])
-                    self.set_permissible_moves(state['permissible_moves'])
-                    self.printBoard()
-                    time.sleep(delay)
-                break
-            elif choice == '4':
-                break
-
-            # Bound the index to the available range
-            index = max(0, min(index, len(log) - 1))
-
-        # Restore the current state after exiting replay
-        self.set_positions(current_state['positions'])
-        self.set_player_turn(current_state['player_turn'])
-        self.set_active_mills(current_state['active_mills'])
-        self.set_remaining_turns(current_state['remaining_turns'])
-        self.set_permissible_moves(current_state['permissible_moves'])
-
-
-
-
-
+        self.play_game()  # This will continue the game from the loaded state.
 
     def new_restart_game(self):
         self.set_positions([0] * 24)
@@ -394,11 +309,11 @@ class Game_Functions(Board):
 
     def cleanup(self):
         if os.path.exists(self.TEMP_LOG_PATH):
+            print("\nGame exited, temporary log cleared.")
             os.remove(self.TEMP_LOG_PATH)
 
     def signal_handler(self, signal, frame):
-        #self.cleanup()
-        print("\nGame exited, temporary log cleared.")
+        self.cleanup()
         sys.exit(0)
 
 def main():
