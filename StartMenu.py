@@ -1,6 +1,7 @@
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
+import numbers
 from NineMensMorris_version7 import Game_Functions
 
 
@@ -69,8 +70,12 @@ class GameModes:
         self.exit_button.pack(pady=10)
 
     def human_vs_human(self):
-        if(self.game.set_board_size(int(self.board_size_field.get()))):
-            subprocess.Popen(['python', 'NineMensMorris_front_end.py'])
+        board_size = self.board_size_field.get()
+        if(isinstance(int(board_size), numbers.Number) and
+           (int(board_size) == 3 or int(board_size) == 6 or int(board_size) == 9)):
+            self.game.set_board_size(int(board_size))
+            command = ['python', 'NineMensMorris_front_end.py', board_size]
+            subprocess.Popen(command)
             print("Starting Human vs Human Game")
         else:
             messagebox.showerror("Error", "Invalid Board Size. Please enter either 3, 6, or 9.")

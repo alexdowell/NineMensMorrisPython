@@ -10,43 +10,14 @@ import time
 class Board:
     def __init__(self):
         self.__board_size = None
-        self.__positions = [0] * 24
+        self.__positions = []
         self.__player_turn = 1
         self.__active_mills = []
-        self.__remaining_turns = 18
-        self.__permissible_moves = {
-        0: [1, 3],
-        1: [0, 2, 9],
-        2: [1, 4],
-        3: [0, 11, 5],
-        4: [2, 12, 7],
-        5: [3, 6],
-        6: [5, 7, 14],
-        7: [4, 6],
-        8: [9, 11],
-        9: [1, 8, 17, 10],
-        10: [9, 12],
-        11: [8, 3, 19, 13],
-        12: [20, 10, 4, 15],
-        13: [11, 14],
-        14: [13, 22, 6, 15],
-        15: [14, 12],
-        16: [19, 17],
-        17: [16, 18, 9],
-        18: [17, 20],
-        19: [16, 11, 21],
-        20: [18, 12, 23],
-        21: [19, 22],
-        22: [14, 21, 23],
-        23: [20, 22]
-    }
+        self.__remaining_turns = 0
+        self.__permissible_moves = {}
     # Setter for board size
     def set_board_size(self, board_size):
-        if(board_size == 3 or board_size == 6 or board_size == 9):
-            self.__board_size = board_size
-            return True
-        else:
-            return False
+        self.__board_size = board_size
             
     # Getter for board size
     def get_board_size(self):
@@ -179,8 +150,8 @@ class Game_Functions(Board):
         self.__temp_log = []
 
         # Handle exit events
-        atexit.register(self.cleanup)
-        signal.signal(signal.SIGINT, self.signal_handler)
+        #atexit.register(self.cleanup)
+        #signal.signal(signal.SIGINT, self.signal_handler)
         
         # check if log exists or create an empty one
         if not os.path.exists("board_log.pkl"):
@@ -198,39 +169,71 @@ class Game_Functions(Board):
 
 
     def place_piece(self, position):
-        if 0 <= position <= 23:
+        upper_limit = 0
+        if(self.get_board_size() == 9):
+            upper_limit = 23
+        elif(self.get_board_size() == 6):
+            upper_limit = 15
+        elif(self.get_board_size() == 3):
+            upper_limit = 8
+    
+        if 0 <= position <= upper_limit:
             if not self.is_occupied(position):
                 self.get_positions()[position] = self.get_player_turn()
                 self.set_remaining_turns(self.get_remaining_turns() - 1)
                 return True
-        return False
+        else:
+            return False
 
     def move_piece(self, current_position, move_to):
-        if 0 <= current_position <= 23 and 0 <= move_to <= 23:
+        upper_limit = 0
+        if(self.get_board_size() == 9):
+            upper_limit = 23
+        elif(self.get_board_size() == 6):
+            upper_limit = 15
+        elif(self.get_board_size() == 3):
+            upper_limit = 8
+    
+        if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
             if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
                 return True
-        return False
+        else:
+            return False
 
     def is_permissible(self, current_position, move_to):
         return move_to in self.get_permissible_moves()[current_position]
 
     def remove_piece(self, position):
-        if 0 <= position <= 23:
+        upper_limit = 0
+        if(self.get_board_size() == 9):
+            upper_limit = 23
+        elif(self.get_board_size() == 6):
+            upper_limit = 15
+        
+        if 0 <= position <= upper_limit:
             if self.is_occupied(position) and not self.is_current_player(position):
                 self.get_positions()[position] = 0
                 print("piece removed")
                 return True
-        return False
+        else:
+            return False
 
     def fly_piece(self, current_position, move_to):
-        if 0 <= current_position <= 23 and 0 <= move_to <= 23:
+        upper_limit = 0
+        if(self.get_board_size() == 9):
+            upper_limit = 23
+        elif(self.get_board_size() == 6):
+            upper_limit = 15
+        
+        if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
             if self.is_occupied(current_position) and self.is_current_player(current_position) and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
                 return True
-        return False
+        else:
+            return False
     
     def form_mill_diff(self, position):
         mill_combinations = []
@@ -443,15 +446,15 @@ class Game_Functions(Board):
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
 
-        self.printBoard()
+        #self.printBoard()
         print("Board state loaded from log.")
-        self.play_game()  # This will continue the game from the loaded state.
-
+        #self.play_game()  # This will continue the game from the loaded state.
+    
     def new_restart_game(self):
         self.set_positions([0] * 24)
         self.set_player_turn(1)
         self.set_active_mills([])
-        self.set_remaining_turns_diff()
+        self.set_remaining_turns(18)
         os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
 

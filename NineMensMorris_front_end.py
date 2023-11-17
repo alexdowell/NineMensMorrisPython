@@ -7,8 +7,19 @@ import pygame
 from NineMensMorris_version7 import Game_Functions as Game_Functions
 
 DEBUG = True
+board_size = 0
+# extract board size from system (from previous screen)
+if(len(sys.argv) > 1):
+    board_size = int(sys.argv[1])
 # Global Variables
 board = Game_Functions()
+# set up board
+board.set_board_size(board_size)
+board.set_positions_diff()
+board.set_player_turn(1)
+board.set_remaining_turns_diff()
+board.set_permissible_moves_diff()
+
 pygame.font.init()  # you have to call this at the start, 
                     # if you want to use this module.
 myfont = pygame.font.SysFont('Arial', 18)
@@ -23,7 +34,8 @@ pygame.display.set_caption("Nine Men Morris")
 print("game window initialized")
 # nine mens morris board images (3 mens, 6 mens, 9 mens)
 boardImg3 = pygame.image.load('3mens.png')
-boardImg9 = pygame.image.load('morrisbig.png')
+boardImg6 = pygame.image.load('6mens.png')
+boardImg9 = pygame.image.load('9mens.png')
 
 # avatar images
 leafImg = pygame.image.load('player1_30x30.png')
@@ -44,35 +56,75 @@ rewind_button = pygame.transform.scale(rewind_button, (30, 30))
 fast_forward_button = pygame.transform.scale(fast_forward_button, (30, 30))
 back_button = pygame.transform.scale(back_button, (30, 30))
 replay_button = pygame.transform.scale(replay_button, (30, 30))
+
+# expand side of 3 mens and 6 mens boards
+boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
+boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
 # coordinates of each board position in Board and corresponding position in the nine mens morris board image
 print("images loaded")
-coords = {
-    0: (22, 22), # positions 0-23 are the 24 positions on the board
-    1: (230, 22),
-    2: (450, 22),
-    3: (22, 240),
-    4: (450, 240),
-    5: (22, 450),
-    6: (230, 450),
-    7: (450, 450),
-    8: (95, 95),
-    9: (230, 95),
-    10: (380, 95),
-    11: (95, 240),
-    12: (380, 240),
-    13: (95, 378),
-    14: (230, 378),
-    15: (380, 378),
-    16: (162, 169),
-    17: (230, 169),
-    18: (308, 169),
-    19: (162, 240),
-    20: (308, 240),
-    21: (162, 308),
-    22: (230, 308),
-    23: (308, 308),
-    24: (550,22), # replay button
-}
+coords = {}
+if(board.get_board_size() == 9):
+    coords = {
+        0: (22, 22), # positions 0-23 are the 24 positions on the board
+        1: (230, 22),
+        2: (450, 22),
+        3: (22, 240),
+        4: (450, 240),
+        5: (22, 450),
+        6: (230, 450),
+        7: (450, 450),
+        8: (95, 95),
+        9: (230, 95),
+        10: (380, 95),
+        11: (95, 240),
+        12: (380, 240),
+        13: (95, 378),
+        14: (230, 378),
+        15: (380, 378),
+        16: (162, 169),
+        17: (230, 169),
+        18: (308, 169),
+        19: (162, 240),
+        20: (308, 240),
+        21: (162, 308),
+        22: (230, 308),
+        23: (308, 308),
+        24: (550,22) # replay button
+    }
+elif(board.get_board_size() == 6):
+    coords = {
+        0: (),
+        1: (),
+        2: (),
+        3: (),
+        4: (),
+        5: (),
+        6: (),
+        7: (),
+        8: (),
+        9: (),
+        10: (),
+        11: (),
+        12: (),
+        13: (),
+        14: (),
+        15: ()
+    }
+elif(board.get_board_size() == 3):
+    coords = {
+        0: (),
+        1: (),
+        2: (),
+        3: (),
+        4: (),
+        5: (),
+        6: (),
+        7: (),
+        8: ()
+
+    }
+
+
 replay_coords = {
     1: (22, 550),  # rewind a move button
     2: (169, 550), # play button
