@@ -57,7 +57,7 @@ fast_forward_button = pygame.transform.scale(fast_forward_button, (30, 30))
 back_button = pygame.transform.scale(back_button, (30, 30))
 replay_button = pygame.transform.scale(replay_button, (30, 30))
 
-# expand side of 3 mens and 6 mens boards
+# expand size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
 boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
 # coordinates of each board position in Board and corresponding position in the nine mens morris board image
@@ -93,37 +93,35 @@ if(board.get_board_size() == 9):
     }
 elif(board.get_board_size() == 6):
     coords = {
-        0: (),
-        1: (),
-        2: (),
-        3: (),
-        4: (),
-        5: (),
-        6: (),
-        7: (),
-        8: (),
-        9: (),
-        10: (),
-        11: (),
-        12: (),
-        13: (),
-        14: (),
-        15: ()
+        0: (49, 50),
+        1: (249, 52),
+        2: (450, 51),
+        3: (149, 151),
+        4: (250, 151),
+        5: (350, 151),
+        6: (48, 252),
+        7: (151, 253),
+        8: (352, 253),
+        9: (451, 252),
+        10: (151, 353),
+        11: (251, 352),
+        12: (351, 353),
+        13: (49, 453),
+        14: (248, 453),
+        15: (449, 452)
     }
 elif(board.get_board_size() == 3):
     coords = {
-        0: (),
-        1: (),
-        2: (),
-        3: (),
-        4: (),
-        5: (),
-        6: (),
-        7: (),
-        8: ()
-
+        0: (47, 49),
+        1: (253, 49),
+        2: (460, 49),
+        3: (46, 255),
+        4: (252, 255),
+        5: (457, 254),
+        6: (47, 459),
+        7: (253, 460),
+        8: (460, 460)
     }
-
 
 replay_coords = {
     1: (22, 550),  # rewind a move button
@@ -219,11 +217,12 @@ def set_replay(idx):
 
     # Save current state
     current_state = {
+        'board_size': board.get_board_size(),
         'positions': board.get_positions(),
         'player_turn': board.get_player_turn(),
         'active_mills': board.get_active_mills(),
         'remaining_turns': board.get_remaining_turns(),
-        'permissible_moves': board.get_permissible_moves()
+        'permissible_moves': board.get_permissible_moves(),
     }
     currentstuff = [log,current_state]
     return currentstuff
@@ -244,6 +243,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
             index = 0
             replay_state = index
         state = log[index]
+        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -260,6 +260,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
         print("log length: ", len(log))
         print("index: ", index)
         state = log[index]
+        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -269,6 +270,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
     if replay_option == 3: # exit replay button
         #reset current state
         current_state = current_state
+        board.set_board_size(state['board_size'])
         board.set_positions(current_state['positions'])
         board.set_player_turn(current_state['player_turn'])
         board.set_active_mills(current_state['active_mills'])
@@ -291,12 +293,12 @@ def game_loop():
     play = False
     pause = False
     sleep = False
+    boardImg = None
     while running:
         try:
             # Event handling
             if play == False:
                 for event in pygame.event.get():
-
                     print(f"Event: {event}")  # This will print out each event captured
                     if event.type == pygame.QUIT:
                         print("Quit event detected. Closing game window...")
@@ -349,13 +351,12 @@ def game_loop():
                                         replay = True
                                         break
                                     if removepos == True:
-                                                board_positions_now = board.get_positions()
-                                                if board.form_mill(idx):
-                                                    board.check_remove_active_mill()
-                                                    removepos = False
-                                                    board.save_current_state_to_log()
-                                                    break
-                                                break
+                                        if board.form_mill(idx):
+                                            board.check_remove_active_mill()
+                                            removepos = False
+                                            board.save_current_state_to_log()
+                                            break
+                                        break
                                     if board.get_remaining_turns() != 0:
                                         print("here2")
                                         print(f"Clicked on position: {idx}")
@@ -444,6 +445,7 @@ def game_loop():
                     counter = time.time()
                     sleep = True
                 state = currentstuff[0][play_loop]
+                board.set_board_size(state['board_size'])
                 board.set_positions(state['positions'])
                 board.set_player_turn(state['player_turn'])
                 board.set_active_mills(state['active_mills'])
@@ -454,19 +456,15 @@ def game_loop():
                 if pause == False:
                     play_loop = round( time.time() - counter )
 
-            #print("startpos: ", startpos)
-            #print("endpos: ", endpos)
-            # print("removepos: ", removepos)
-            # print("replay: ", replay)
-            # print("play: ", play)
-            # print("board positions: ", board.get_positions())
-            # print("board player turn: ", board.get_player_turn())
-            #     # Add more event handling logic here for other phases
-            # print("remaining turns: ", board.get_remaining_turns())
-            # Drawing the game state
-            #print("Calling draw_board()...")
             screen.fill(WHITE)
-            draw_board(screen, boardImg9, board.get_positions(), coords, replay, play)
+            if(board.get_board_size() == 9):
+                boardImg = boardImg9
+            elif(board.get_board_size() == 6):
+                boardImg = boardImg6
+            elif(board.get_board_size() == 3):
+                boardImg = boardImg3
+            
+            draw_board(screen, boardImg, board.get_positions(), coords, replay, play)
             if sleep == True:
                 time.sleep(1)
                 sleep = False
