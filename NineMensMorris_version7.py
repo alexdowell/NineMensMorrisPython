@@ -265,11 +265,13 @@ class Game_Functions(Board):
                 if combo not in self.get_active_mills():
                     newly_formed_mills.append(combo)
         if newly_formed_mills and (self.get_board_size() == 6 or self.get_board_size() == 9):
-            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-            self.remove_piece(position)
+            if self.remove_piece(position):
+                self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+                return True
         elif newly_formed_mills and self.get_board_size() == 3:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
             self.is_game_over_diff()
+            return False
 
     def form_mill(self, position):
         mill_combinations = [
@@ -368,26 +370,14 @@ class Game_Functions(Board):
         print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         exit()
 
-    def start_menu(self):
-        choice = input("Select: 1. New/Restart Game 2. Load Game 3. Game Type (default is 9): ")
-        if choice == '1':
-            self.new_restart_game()
-        elif choice == '2':
-            self.load()
-        elif choice == '3':
-            print("Currently, only Nine Men's Morris (9) is supported.")
-            self.new_restart_game()
-        else:
-            print("Invalid choice.")
-            self.start_menu()
-
     def save_current_state_to_log(self):
         state = {
             'positions': copy.deepcopy(self.get_positions()),
             'player_turn': self.get_player_turn(),
             'active_mills': copy.deepcopy(self.get_active_mills()),
             'remaining_turns': self.get_remaining_turns(),
-            'permissible_moves': self.get_permissible_moves()
+            'permissible_moves': self.get_permissible_moves(),
+            'board_size': self.get_board_size()
         }
         print("State before appending to temp_log:", state)  # Debug statement
         self.__temp_log.append(state)
@@ -437,18 +427,22 @@ class Game_Functions(Board):
         self.set_active_mills(state['active_mills'])
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
+        self.set_board_size(state['board_size'])
 
         #self.printBoard()
         print("Board state loaded from log.")
         #self.play_game()  # This will continue the game from the loaded state.
     
-    def new_restart_game(self):
+    '''
+        def new_restart_game(self):
         self.set_positions([0] * 24)
         self.set_player_turn(1)
         self.set_active_mills([])
         self.set_remaining_turns(18)
         os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
+    '''
+
 
 '''
 def new_restart_game(self):
