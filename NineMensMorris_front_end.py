@@ -7,18 +7,41 @@ import pygame
 from NineMensMorris_version7 import Game_Functions as Game_Functions
 
 DEBUG = True
-board_size = 0
+
+# Global Variables
+board = Game_Functions()
+
+# look if the load_game.txt file exists and if it doesn't exist, then create it and save variable_load == false in it
+if not os.path.exists("load_game.txt"):
+    variable_load = 'False'
+    
+    # save load == false in load_game.txt
+    variable_load = open("load_game.txt", "w+")
+    variable_load.write('False')
+
+# open("load_game.txt", "w+")
+# read data in load_game.txt if load_game.txt is empty, then create load == true
+# if load_game.txt is not empty, then create load == false
+
+# open load_game.txt and save the data in load variable
+variable_load = open("load_game.txt", "r")
+variable_load = variable_load.read()
+
+
+# set up new board
+# if variable_load == 'False':
+board_size = 9
+
 # extract board size from system (from previous screen)
 if(len(sys.argv) > 1):
     board_size = int(sys.argv[1])
-# Global Variables
-board = Game_Functions()
-# set up board
+
 board.set_board_size(board_size)
 board.set_positions_diff()
 board.set_player_turn(1)
 board.set_remaining_turns_diff()
 board.set_permissible_moves_diff()
+
 
 pygame.font.init()  # you have to call this at the start, 
                     # if you want to use this module.
@@ -49,6 +72,8 @@ rewind_button = pygame.image.load('rewind_button.png')
 fast_forward_button = pygame.image.load('fast_forward_button.png')
 back_button = pygame.image.load('back_button.png')
 replay_button = pygame.image.load('replay_button.png')
+save_button = pygame.image.load('save_button.png')
+load_button = pygame.image.load('load_button.png')
 # rduce size of of the replay button images
 play_button = pygame.transform.scale(play_button, (30, 30))
 pause_button = pygame.transform.scale(pause_button, (30, 30))
@@ -56,6 +81,8 @@ rewind_button = pygame.transform.scale(rewind_button, (30, 30))
 fast_forward_button = pygame.transform.scale(fast_forward_button, (30, 30))
 back_button = pygame.transform.scale(back_button, (30, 30))
 replay_button = pygame.transform.scale(replay_button, (30, 30))
+save_button = pygame.transform.scale(save_button, (30, 30))
+load_button = pygame.transform.scale(load_button, (30, 30))
 
 # expand side of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
@@ -89,7 +116,9 @@ if(board.get_board_size() == 9):
         21: (162, 308),
         22: (230, 308),
         23: (308, 308),
-        24: (550,22) # replay button
+        24: (550,22), # replay button
+        25: (550, 122), # save button
+        26: (550, 222) # load button
     }
 elif(board.get_board_size() == 6):
     coords = {
@@ -173,6 +202,9 @@ def draw_board(screen, board_img, positions, coords,replay,play):
         # Draw replay button
         if replay == False and play == False:
             screen.blit(replay_button.convert_alpha(), (coords[24]))
+            screen.blit(save_button.convert_alpha(), (coords[25]))
+            screen.blit(load_button.convert_alpha(), (coords[26]))
+
         if replay == True and play == False:
             screen.blit(rewind_button.convert_alpha(), (replay_coords[1]))
             screen.blit(play_button.convert_alpha(), (replay_coords[2]))
@@ -274,7 +306,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
         board.set_active_mills(current_state['active_mills'])
         board.set_remaining_turns(current_state['remaining_turns'])
 
-def game_loop():
+def game_loop(variable_load):
 
     print("Initializing game window...")
     screen.fill(WHITE)
@@ -348,6 +380,15 @@ def game_loop():
                                         currentstuff = set_replay(idx)
                                         replay = True
                                         break
+                                    
+                                    if idx == 25:
+                                        board.save()
+                                        break
+
+                                    if idx == 26:
+                                        board.load()
+                                        break
+
                                     if removepos == True:
                                                 board_positions_now = board.get_positions()
                                                 if board.form_mill(idx):
@@ -465,6 +506,23 @@ def game_loop():
             # print("remaining turns: ", board.get_remaining_turns())
             # Drawing the game state
             #print("Calling draw_board()...")
+
+            if variable_load == 'True':
+                board.load()
+                
+                # save load == false in load_game.txt
+                variable_load = open("load_game.txt", "w+")
+                variable_load.write('False')
+                variable_load.close()
+                
+                variable_load = 'False'
+
+                print(f'This is: {variable_load}')
+
+                # open("load_game.txt", "r")
+                # variable_load = variable_load.read()
+                # print(variable_load)
+            
             screen.fill(WHITE)
             draw_board(screen, boardImg9, board.get_positions(), coords, replay, play)
             if sleep == True:
@@ -490,4 +548,4 @@ def game_loop():
     sys.exit()
 
 
-game_loop()
+game_loop(variable_load)

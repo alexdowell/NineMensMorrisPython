@@ -405,14 +405,6 @@ class Game_Functions(Board):
 
 
     def save(self):
-        state = {
-            'positions': self.get_positions(),
-            'player_turn': self.get_player_turn(),
-            'active_mills': self.get_active_mills(),
-            'remaining_turns': self.get_remaining_turns(),
-            'permissible_moves': self.get_permissible_moves()
-        }
-        
         # Print all states in the temp_log before saving
         print("States in log before saving:")
         for index, s in enumerate(self.__temp_log, 1):

@@ -98,11 +98,15 @@ class StartMenu(tk.Tk):
         self.geometry("800x600")
         self.configure(background="#87CEEB")
 
+        self.game = Game_Functions()
+
         title_font = ("Arial", 48, "bold")
         button_font = ("Arial", 18)
 
         self.title_label = tk.Label(self, text="Nine Men's Morris", font=title_font)
         self.title_label.pack(pady=20)
+
+        self.game_functions = Game_Functions() 
 
         self.new_game_button = tk.Button(self, text="New Game", font=button_font, command=self.show_new_game_options, width=15)
         self.new_game_button.pack(pady=10)
@@ -110,7 +114,7 @@ class StartMenu(tk.Tk):
         self.rules_button = tk.Button(self, text="Rules", font=button_font, command=self.show_game_instructions, width=15)
         self.rules_button.pack(pady=10)
 
-        self.load_game_button = tk.Button(self, text="Load Game", font=button_font, width=15)
+        self.load_game_button = tk.Button(self, text="Load Game", font=button_font, command=self.load_game, width=15)
         self.load_game_button.pack(pady=10)
 
         self.exit_button = tk.Button(self, text="Exit Game", font=button_font, command=self.quit, width=15)
@@ -122,6 +126,17 @@ class StartMenu(tk.Tk):
 
     def show_new_game_options(self):
         new_game_window = GameModes()
+
+    def load_game(self):
+        # self.game_functions.load()
+        # open up a boolean data or text file or create one if it doesn't exist and name it load_game.txt
+
+        variable_load = open("load_game.txt", "w+")
+        variable_load.write('True')
+
+        command = ['python', 'NineMensMorris_front_end.py']
+        subprocess.Popen(command)
+        print("Starting Human vs Human Game")
 
 if __name__ == "__main__":
     app = StartMenu()
