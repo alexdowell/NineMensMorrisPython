@@ -181,7 +181,7 @@ class Game_Functions(Board):
             if not self.is_occupied(position):
                 self.get_positions()[position] = self.get_player_turn()
                 self.set_remaining_turns(self.get_remaining_turns() - 1)
-                return True
+            return True
         else:
             return False
 
@@ -243,13 +243,13 @@ class Game_Functions(Board):
             [1, 4, 7], [2, 4, 6], [2, 5, 8],
             [6, 7, 8]
             ]
-        elif(self.get_board_size == 6):
+        elif(self.get_board_size() == 6):
             mill_combinations = [
             [0, 1, 2], [0, 6, 13], [2, 9, 15],
             [3, 4, 5], [3, 7, 10], [5, 8, 12],
             [10, 11, 12], [13, 14, 15]
             ]
-        elif(self.get_board_size == 9):
+        elif(self.get_board_size() == 9):
             mill_combinations = [
             [0, 1, 2], [2, 4, 7], [5, 6, 7],
             [0, 3, 5], [8, 9, 10], [10, 12, 15],
@@ -270,8 +270,6 @@ class Game_Functions(Board):
                 return True
         elif newly_formed_mills and self.get_board_size() == 3:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-            self.is_game_over_diff()
-            return False
 
     def form_mill(self, position):
         mill_combinations = [
@@ -295,20 +293,20 @@ class Game_Functions(Board):
                 return True
 
     def form_mill_GUI(self):
-        mill_combinations = []
+        mill_combinations = None
         if(self.get_board_size() == 3):
             mill_combinations = [
             [0, 1, 2], [0, 4, 8], [0, 3, 6],
             [1, 4, 7], [2, 4, 6], [2, 5, 8],
-            [6, 7, 8]
+            [6, 7, 8], [3, 4, 5]
             ]
-        elif(self.get_board_size == 6):
+        elif(self.get_board_size() == 6):
             mill_combinations = [
             [0, 1, 2], [0, 6, 13], [2, 9, 15],
             [3, 4, 5], [3, 7, 10], [5, 8, 12],
             [10, 11, 12], [13, 14, 15]
             ]
-        elif(self.get_board_size == 9):
+        elif(self.get_board_size() == 9):
             mill_combinations = [
             [0, 1, 2], [2, 4, 7], [5, 6, 7],
             [0, 3, 5], [8, 9, 10], [10, 12, 15],
@@ -317,16 +315,21 @@ class Game_Functions(Board):
             [16, 19, 21], [1, 9, 17], [20, 12, 4],
             [22, 14, 6], [3, 11, 19]
             ]
+        print("Board size: ", self.get_board_size())
         newly_formed_mills = []
         print("backend positions:", self.get_positions())
         print("backend player turn:", self.get_player_turn())
         for combo in mill_combinations:
+            print(" ==== Comparison ====")
+            print(self.get_positions()[combo[0]], "," ,self.get_positions()[combo[1]], "," , self.get_positions()[combo[2]])
             if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
                 print("combo:", combo)
                 if combo not in self.get_active_mills():
                     print("newly formed mill:", combo)
                     newly_formed_mills.append(combo)
-                    return True
+                    return True 
+        return False
+
 
     def opposite_player_turn(self):
         if self.get_player_turn() == 1:
@@ -344,14 +347,6 @@ class Game_Functions(Board):
 
         for mill in mills_to_remove:
             self.get_active_mills().remove(mill)
-    
-    def is_game_over_diff(self):
-        if(self.get_board_size() == 6 or self.get_board_size() == 9):
-            current_player_pieces = self.get_positions().count(self.get_player_turn())
-            return current_player_pieces <= 2
-        elif(self.get_board_size() == 3):
-            return self.get_active_mills()[0][0] == self.get_player_turn() and self.get_active_mills()[0][1] == self.get_player_turn() and self.get_active_mills()[0][2] == self.get_player_turn()
-
 
     def is_game_over(self):
         current_player_pieces = self.get_positions().count(self.get_player_turn())

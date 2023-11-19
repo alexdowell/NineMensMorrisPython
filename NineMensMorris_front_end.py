@@ -351,6 +351,7 @@ def game_loop(variable_load):
     pause = False
     sleep = False
     boardImg = None
+    test = True
     while running:
         try:
             # Event handling
@@ -401,21 +402,21 @@ def game_loop(variable_load):
                                 # print("here1")
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
-                                    if idx == 24:
+                                    if idx == 24 or idx == 16 or idx == 9:
                                         currentstuff = set_replay(idx)
                                         replay = True
                                         break
                                     
-                                    if idx == 25:
+                                    if idx == 25 or idx == 17 or idx == 10:
                                         board.save()
                                         break
 
-                                    if idx == 26:
+                                    if idx == 26 or idx == 18 or idx == 11:
                                         board.load()
                                         break
 
                                     if removepos == True:
-                                        if board.form_mill(idx):
+                                        if board.form_mill_diff(idx):
                                             board.check_remove_active_mill()
                                             removepos = False
                                             board.save_current_state_to_log()
@@ -426,10 +427,19 @@ def game_loop(variable_load):
                                         print(f"Clicked on position: {idx}")
                                         if board.place_piece(idx):
                                             board.check_remove_active_mill()
-                                            if board.form_mill_GUI():
+                                            print("here passed place piece")
+                                            if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                 removepos = True
                                                 break
+                                            elif board.form_mill_GUI() and board.get_board_size() == 3:
+                                                print("Game over!")
+                                                board.save_current_state_to_log()
+                                                print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                gameover = True
+                                                break
                                             board.save_current_state_to_log()
+                                            print("Form mill GUI = ", board.form_mill_GUI())
+                                            print("Board size: ", board.get_board_size())
                                             break
                                     if board.get_remaining_turns() == 0:
                                             if board.is_game_over():
@@ -437,6 +447,7 @@ def game_loop(variable_load):
                                                 print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                 gameover = True
                                                 break
+                                            
                                             if startpos == None:
                                                 startpos = idx
                                                 print("startpos: ", startpos)
@@ -464,10 +475,14 @@ def game_loop(variable_load):
                                                 else:
                                                     if board.move_piece(startpos, endpos):
                                                         board.check_remove_active_mill()
-                                                        if board.form_mill_GUI():
+                                                        if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                             removepos = True
-                                                            startpos = None
-                                                            endpos = None
+                                                            break
+                                                        elif board.form_mill_GUI() and board.get_board_size() == 3:
+                                                            print("Game over!")
+                                                            board.save_current_state_to_log()
+                                                            print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                            gameover = True
                                                             break
                                                         board.save_current_state_to_log()
                                                         startpos = None
@@ -522,7 +537,8 @@ def game_loop(variable_load):
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            # print("removepos: ", removepos)
+            print("removepos: ", removepos)
+            print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
             # print("board positions: ", board.get_positions())
@@ -570,6 +586,7 @@ def game_loop(variable_load):
 
             # Frame rate
             clock.tick(60)
+            
         except Exception as e:
             print(f"Error in game loop: {e}")
             running = False
