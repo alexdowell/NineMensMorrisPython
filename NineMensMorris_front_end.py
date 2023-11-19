@@ -14,7 +14,7 @@ if(len(sys.argv) > 1):
 # Global Variables
 board = Game_Functions()
 # set up board
-board.set_board_size(board_size)
+board.set_board_size(9)
 board.set_positions_diff()
 board.set_player_turn(1)
 board.set_remaining_turns_diff()
@@ -93,34 +93,36 @@ if(board.get_board_size() == 9):
     }
 elif(board.get_board_size() == 6):
     coords = {
-        0: (49, 50),
-        1: (249, 52),
-        2: (450, 51),
-        3: (149, 151),
-        4: (250, 151),
-        5: (350, 151),
-        6: (48, 252),
-        7: (151, 253),
-        8: (352, 253),
-        9: (451, 252),
-        10: (151, 353),
-        11: (251, 352),
-        12: (351, 353),
-        13: (49, 453),
-        14: (248, 453),
-        15: (449, 452)
+        0: (12, 16),
+        1: (235, 16),
+        2: (460, 16),
+        3: (125, 130),
+        4: (235, 130),
+        5: (348, 130),
+        6: (12, 240),
+        7: (125, 240),
+        8: (348, 240),
+        9: (460, 240),
+        10: (125, 350),
+        11: (235, 350),
+        12: (348, 350),
+        13: (12, 463),
+        14: (235, 463),
+        15: (460, 463),
+        16: (550, 22) # replay button
     }
 elif(board.get_board_size() == 3):
     coords = {
-        0: (47, 49),
-        1: (253, 49),
-        2: (460, 49),
-        3: (46, 255),
-        4: (252, 255),
-        5: (457, 254),
-        6: (47, 459),
-        7: (253, 460),
-        8: (460, 460)
+        0: (33, 34),
+        1: (238, 34),
+        2: (443, 34),
+        3: (33, 240),
+        4: (238, 240),
+        5: (445, 240),
+        6: (33, 443),
+        7: (238, 443),
+        8: (445, 443),
+        9: (550, 22)
     }
 
 replay_coords = {
@@ -170,7 +172,14 @@ def draw_board(screen, board_img, positions, coords,replay,play):
                 screen.blit(fireImg.convert_alpha(), (x, y))
         # Draw replay button
         if replay == False and play == False:
-            screen.blit(replay_button.convert_alpha(), (coords[24]))
+            replay_btn_coord = None
+            if(board.get_board_size() == 3):
+                replay_btn_coord = coords[9]
+            elif(board.get_board_size() == 6):
+                replay_btn_coord = coords[16]
+            elif(board.get_board_size() == 9):
+                replay_btn_coord = coords[24]
+            screen.blit(replay_button.convert_alpha(), (replay_btn_coord))
         if replay == True and play == False:
             screen.blit(rewind_button.convert_alpha(), (replay_coords[1]))
             screen.blit(play_button.convert_alpha(), (replay_coords[2]))
@@ -302,10 +311,8 @@ def game_loop():
                     print(f"Event: {event}")  # This will print out each event captured
                     if event.type == pygame.QUIT:
                         print("Quit event detected. Closing game window...")
-                        board.cleanup()
                         running = False
                         break
-                        
                     print("event.type: ", event.type)
                     print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
                     if event.type == pygame.MOUSEBUTTONUP:
