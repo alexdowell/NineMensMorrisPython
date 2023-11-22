@@ -31,7 +31,7 @@ variable_load = variable_load.read()
 # set up new board
 # if variable_load == 'False':
 #board_size = 9
-
+board_size = 0
 # extract board size from system (from previous screen)
 if(len(sys.argv) > 1):
     board_size = int(sys.argv[1])
@@ -240,25 +240,36 @@ def draw_board(screen, board_img, positions, coords,replay,play):
     except Exception as e:
         print(f"Error drawing the board: {e}")
 
-def draw_game_info(screen, game_functions, gameover):
+def draw_game_info(screen, game_functions, gameover, removepos):
     # Display the variables from the Board class
     if gameover == True:
         texts = [
         f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
         ]
-    
     if gameover == False:
         if(game_functions.get_remaining_turns() != 0):
-            texts = [
-                f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
-                f"Remaining Turns: {game_functions.get_remaining_turns()}"
-            ]
+            if(removepos):
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    f"Select an opponent's piece to remove from the board."
+                ]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    f"Remaining Turns: {game_functions.get_remaining_turns()}"
+                ]
+
         elif(game_functions.get_remaining_turns() == 0):
-            texts = [
-                f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
-                f"It's time to move pieces! Select a piece to move then select the position you want to move to."
-            ]
-    
+            if(removepos):
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    f"Select an opponent's piece to remove from the board."
+                ]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    f"It's time to move pieces! Select a piece to move then select the position you want to move to."
+                ]
 
     for i, text in enumerate(texts):
         textsurface = myfont.render(text, False, (0, 0, 0))
@@ -408,7 +419,6 @@ def game_loop(variable_load):
                                 # print("here1")
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
-
                                     if(board.get_board_size() == 9):
                                         if(idx == 24):
                                             currentstuff = set_replay(idx)
@@ -477,13 +487,13 @@ def game_loop(variable_load):
                                             if startpos == None:
                                                 startpos = idx
                                                 #print("startpos: ", startpos)
-                                                print("Starting position (piece selected to move): ", startpos)
+                                                #print("Starting position (piece selected to move): ", startpos)
                                                 break
                                             else:
                                                 if startpos == idx:
                                                     break
                                                 endpos = idx
-                                                print("Ending position (position to move to): ", endpos)
+                                                #print("Ending position (position to move to): ", endpos)
                                                 #print("endpos: ", endpos)
                                                 if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                     if board.fly_piece(startpos, endpos):
@@ -565,7 +575,7 @@ def game_loop(variable_load):
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            #print("removepos: ", removepos)
+            print("removepos: ", removepos)
             #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
@@ -606,7 +616,7 @@ def game_loop(variable_load):
                 sleep = False
             
             #print("Calling draw_game_info()...")
-            draw_game_info(screen, board, gameover)
+            draw_game_info(screen, board, gameover, removepos)
 
             # Updating the display
             #print("Updating display...")
