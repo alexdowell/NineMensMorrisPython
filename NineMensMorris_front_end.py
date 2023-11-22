@@ -459,7 +459,7 @@ def game_loop(variable_load):
                                         elif(idx == 26):
                                             board.load()
                                             break
-                                        elif(gameover and idx == 27):
+                                        elif(idx == 27):
                                             board.new_restart_game()
                                             gameover = False
                                             break
@@ -474,7 +474,7 @@ def game_loop(variable_load):
                                         elif(idx == 18):
                                             board.load()
                                             break
-                                        elif(gameover and idx == 19):
+                                        elif(idx == 19):
                                             board.new_restart_game()
                                             gameover = False
                                             break
@@ -489,7 +489,7 @@ def game_loop(variable_load):
                                         elif(idx == 11):
                                             board.load()
                                             break
-                                        elif(gameover and idx == 12):
+                                        elif(idx == 12):
                                             board.new_restart_game()
                                             gameover = False
                                             break
