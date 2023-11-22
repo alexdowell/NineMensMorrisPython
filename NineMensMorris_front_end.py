@@ -41,10 +41,10 @@ board = Game_Functions()
 # board.set_board_size(9)
 
 board.set_board_size(board_size)
-board.set_positions_diff()
+board.set_initial_positions()
 board.set_player_turn(1)
-board.set_remaining_turns_diff()
-board.set_permissible_moves_diff()
+board.set_initial_remaining_turns()
+board.set_initial_permissible_moves()
 
 
 pygame.font.init()  # you have to call this at the start, 
@@ -248,13 +248,16 @@ def draw_game_info(screen, game_functions, gameover):
         ]
     
     if gameover == False:
-        texts = [
-            f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
-            f"Positions: {game_functions.get_positions()}",
-            #f"Player Turn: {game_functions.get_player_turn()}",
-            f"Active Mills: {game_functions.get_active_mills()}",
-            f"Remaining Turns: {game_functions.get_remaining_turns()}",
-        ]
+        if(game_functions.get_remaining_turns() != 0):
+            texts = [
+                f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                f"Remaining Turns: {game_functions.get_remaining_turns()}"
+            ]
+        elif(game_functions.get_remaining_turns() == 0):
+            texts = [
+                f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                f"It's time to move pieces! Select a piece to move then select the position you want to move to."
+            ]
     
 
     for i, text in enumerate(texts):
@@ -342,7 +345,7 @@ def game_loop(variable_load):
     screen.fill(WHITE)
     clock = pygame.time.Clock()
 
-    print("Entering main game loop...")
+    #print("Entering main game loop...")
     running = True
     startpos = None
     endpos = None
@@ -405,21 +408,42 @@ def game_loop(variable_load):
                                 # print("here1")
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
-                                    if idx == 24 or idx == 16 or idx == 9:
-                                        currentstuff = set_replay(idx)
-                                        replay = True
-                                        break
-                                    
-                                    if idx == 25 or idx == 17 or idx == 10:
-                                        board.save()
-                                        break
 
-                                    if idx == 26 or idx == 18 or idx == 11:
-                                        board.load()
-                                        break
-
+                                    if(board.get_board_size() == 9):
+                                        if(idx == 24):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 25):
+                                            board.save()
+                                            break
+                                        elif(idx == 26):
+                                            board.load()
+                                            break
+                                    elif(board.get_board_size() == 6):
+                                        if(idx == 16):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 17):
+                                            board.save()
+                                            break
+                                        elif(idx == 18):
+                                            board.load()
+                                            break
+                                    elif(board.get_board_size() == 3):
+                                        if(idx == 9):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 10):
+                                            board.save()
+                                            break
+                                        elif(idx == 11):
+                                            board.load()
+                                            break
                                     if removepos == True:
-                                        if board.form_mill_diff(idx):
+                                        if board.form_mill(idx):
                                             board.check_remove_active_mill()
                                             removepos = False
                                             board.save_current_state_to_log()
@@ -590,12 +614,6 @@ def game_loop(variable_load):
 
             # Frame rate
             clock.tick(60)
-
-            # Game status
-            if(board.get_remaining_turns() != 0):
-                print("***** PLACE PIECE PHASE *****")
-            elif(board.get_remaining_turns() == 0):
-                print("***** MOVE PIECE PHASE *****")
             
         except Exception as e:
             print(f"Error in game loop: {e}")

@@ -27,15 +27,16 @@ class Board:
     def get_positions(self):
         return self.__positions
     
-    # Setter for different positions
-    def set_positions_diff(self):
+    # Setter for initial positions
+    def set_initial_positions(self):
         if(self.get_board_size() == 3):
             self.__positions = [0] * 9
         elif(self.get_board_size() == 6):
             self.__positions = [0] * 16
         elif(self.get_board_size() == 9):
             self.__positions = [0] * 24
-    # Setter for positions
+    
+    # Setter for positions (when loading or saving a game)
     def set_positions(self, positions):
         self.__positions = positions
 
@@ -59,16 +60,16 @@ class Board:
     def get_remaining_turns(self):
         return self.__remaining_turns
     
-    # Setter for different remaining turns
-    def set_remaining_turns_diff(self):
+    # Setter for initial remaining turns
+    def set_initial_remaining_turns(self):
         if(self.get_board_size() == 3):
             self.__remaining_turns = 6
         elif(self.get_board_size() == 6):
             self.__remaining_turns = 12
         elif(self.get_board_size() == 9):
             self.__remaining_turns = 18
-
-    # Setter for remaining_turns
+    
+    # Setter for remaining turns (when loading or saving a game)
     def set_remaining_turns(self, remaining_turns):
         self.__remaining_turns = remaining_turns
 
@@ -76,8 +77,8 @@ class Board:
     def get_permissible_moves(self):
         return self.__permissible_moves
     
-    # Setter for different remaining turns
-    def set_permissible_moves_diff(self):
+    # Setter for initial permissible moves
+    def set_initial_permissible_moves(self):
         if(self.get_board_size() == 3):
             self.__permissible_moves = {
                 0: [1, 3, 4],
@@ -136,8 +137,7 @@ class Board:
                 22: [14, 21, 23],
                 23: [20, 22]
             }
-    
-    # Setter for permissible moves
+    # Setter for permissible moves (when loading or saving a game)
     def set_permissible_moves(self, permissible_moves):
         self.__permissible_moves = permissible_moves
 
@@ -236,7 +236,7 @@ class Game_Functions(Board):
         else:
             return False
     
-    def form_mill_diff(self, position):
+    def form_mill(self, position):
         mill_combinations = []
         if(self.get_board_size() == 3):
             mill_combinations = [
@@ -294,43 +294,20 @@ class Game_Functions(Board):
             [16, 19, 21], [1, 9, 17], [20, 12, 4],
             [22, 14, 6], [3, 11, 19]
             ]
-        print("Board size: ", self.get_board_size())
+        #print("Board size: ", self.get_board_size())
         newly_formed_mills = []
-        print("backend positions:", self.get_positions())
-        print("backend player turn:", self.get_player_turn())
+        #print("backend positions:", self.get_positions())
+        #print("backend player turn:", self.get_player_turn())
         for combo in mill_combinations:
-            print(" ==== Comparison ====")
+            #print(" ==== Comparison ====")
             print(self.get_positions()[combo[0]], "," ,self.get_positions()[combo[1]], "," , self.get_positions()[combo[2]])
             if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
-                print("combo:", combo)
+                #print("combo:", combo)
                 if combo not in self.get_active_mills():
-                    print("newly formed mill:", combo)
+                    #print("newly formed mill:", combo)
                     newly_formed_mills.append(combo)
                     return True 
         return False
-    
-
-
-    #def form_mill(self, position):
-    #    mill_combinations = [
-    #       [0, 1, 2], [2, 4, 7], [5, 6, 7],
-    #    [0, 3, 5], [8, 9, 10], [10, 12, 15],
-    #    [13, 14, 15], [8, 11, 13],
-    #    [16, 17, 18], [18, 20, 23], [21, 22, 23],
-    #    [16, 19, 21], [1, 9, 17], [20, 12, 4],
-    #    [22, 14, 6], [3, 11, 19]
-    #    ]
-    #    newly_formed_mills = []
-
-    #    for combo in mill_combinations:
-    #        if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
-    #           if combo not in self.get_active_mills():
-    #                newly_formed_mills.append(combo)
-
-    #    if newly_formed_mills:
-    #        if self.remove_piece(position):
-    #            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-    #            return True
 
     def opposite_player_turn(self):
         if self.get_player_turn() == 1:
@@ -458,11 +435,4 @@ def new_restart_game(self):
     def signal_handler(self, signal, frame):
         self.cleanup()
         sys.exit(0)
-
-def main():
-    game = Game_Functions()  # Create a Game_Functions object.
-    game.start_menu()  # Start the game with the main menu.
-
-if __name__ == "__main__":
-    main()
 '''

@@ -51,15 +51,16 @@ class GameModes:
 
         self.font_large = ("Arial", 24)
 
-        self.button_width = 15  # Set a common width for all buttons
+        self.button_field_width = 15  # Set a common width for all buttons
 
-        self.button1 = tk.Button(self.window, text="Human vs Human", font=self.font_large, bg="pink", command=self.human_vs_human, width=self.button_width)
-        self.button2 = tk.Button(self.window, text="Human vs Computer", font=self.font_large, bg="#CCCCFF", command=self.human_vs_computer, width=self.button_width)
-        self.button3 = tk.Button(self.window, text="Nine Men's Morris", font=self.font_large, bg="#CCFFCC", command=self.nine_mens_morris, width=self.button_width)
+        self.button1 = tk.Button(self.window, text="Human vs Human", font=self.font_large, bg="pink", command=self.human_vs_human, width=self.button_field_width)
+        self.button2 = tk.Button(self.window, text="Human vs Computer", font=self.font_large, bg="#CCCCFF", command=self.human_vs_computer, width=self.button_field_width)
+        self.button3 = tk.Button(self.window, text="Nine Men's Morris", font=self.font_large, bg="#CCFFCC", command=self.nine_mens_morris, width=self.button_field_width)
         self.board_size_label = tk.Label(self.window, text="Board Size: ", font=self.font_large)
-        self.board_size_field = tk.Entry(self.window, font=self.font_large, width=15)
-        self.exit_button = tk.Button(self.window, text="Exit", font=self.font_large, bg="red", command=self.window.destroy, width=self.button_width)
-        self.rules_button = tk.Button(self.window, text="Rules", font=self.font_large, bg="orange", command=self.show_game_instructions, width=self.button_width)
+        self.board_size_field = tk.Entry(self.window, font=self.font_large, width=self.button_field_width)
+        self.board_size_field.insert(0, "9")
+        self.exit_button = tk.Button(self.window, text="Exit", font=self.font_large, bg="red", command=self.window.destroy, width=self.button_field_width)
+        self.rules_button = tk.Button(self.window, text="Rules", font=self.font_large, bg="orange", command=self.show_game_instructions, width=self.button_field_width)
 
         self.button1.pack(pady=10)
         self.button2.pack(pady=10)
@@ -78,11 +79,27 @@ class GameModes:
             subprocess.Popen(command)
             print("Starting Human vs Human Game")
         else:
+            self.board_size_field.delete(0, len(self.board_size_field.get()))
+            self.board_size_field.insert(0, "9")
             messagebox.showerror("Error", "Invalid Board Size. Please enter either 3, 6, or 9.")
 
 
     def human_vs_computer(self):
-        print("Starting Human vs Computer Game")
+        board_size = self.board_size_field.get()
+        '''
+        if(isinstance(int(board_size), numbers.Number) and
+           (int(board_size) == 3 or int(board_size) == 6 or int(board_size) == 9)):
+            self.game.set_board_size(int(board_size))
+            command = ['python', 'NineMensMorris_front_end.py', board_size]
+            subprocess.Popen(command)
+            print("Starting Human vs Computer Game")
+        else:
+            self.board_size_field.delete(0, len(self.board_size_field.get()))
+            self.board_size_field.insert(0, "9")
+            messagebox.showerror("Error", "Invalid Board Size. Please enter either 3, 6, or 9.")
+        
+        '''
+
 
     def nine_mens_morris(self):
         print("Starting Nine Men's Morris Game")
