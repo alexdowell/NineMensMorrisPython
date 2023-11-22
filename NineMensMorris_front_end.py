@@ -265,7 +265,8 @@ def draw_game_info(screen, game_functions, gameover, removepos, replay):
             ]
         else:
             texts = [
-                f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
+                f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
+                f"Close window to change game settings or click Restart"
             ]
     if gameover == False:
         if(game_functions.get_remaining_turns() != 0):
