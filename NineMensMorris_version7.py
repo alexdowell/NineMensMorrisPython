@@ -340,8 +340,9 @@ class Game_Functions(Board):
                 permissible = self.get_permissible_moves()[position]
                 if any([self.get_positions()[move] == 0 for move in permissible]):
                     return False
-        print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
-        exit()
+        #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
+        return True
+    
 
     def save_current_state_to_log(self):
         state = {
@@ -406,15 +407,17 @@ class Game_Functions(Board):
         print("Board state loaded from log.")
         #self.play_game()  # This will continue the game from the loaded state.
     
-    '''
-        def new_restart_game(self):
-        self.set_positions([0] * 24)
+    def new_restart_game(self):
+        self.set_board_size(self.get_board_size())
+        self.set_initial_positions()
         self.set_player_turn(1)
         self.set_active_mills([])
-        self.set_remaining_turns(18)
-        os.remove(self.TEMP_LOG_PATH)
+        self.set_initial_remaining_turns()
+        self.set_initial_permissible_moves()
+        if os.path.exists(self.TEMP_LOG_PATH):
+            os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-    '''
+
 
 
 '''

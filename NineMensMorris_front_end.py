@@ -69,6 +69,8 @@ leafImg = pygame.image.load('player1_30x30.png')
 fireImg = pygame.image.load('player2_30x30.png')
 highImg = pygame.image.load('high.png')
 roboImg = pygame.image.load('robo1.png')
+# restart button
+restart_button = pygame.image.load('restart.png')
 # replay buttons
 play_button = pygame.image.load('play_button.png')
 pause_button = pygame.image.load('pause_button.png')
@@ -87,6 +89,7 @@ back_button = pygame.transform.scale(back_button, (30, 30))
 replay_button = pygame.transform.scale(replay_button, (30, 30))
 save_button = pygame.transform.scale(save_button, (30, 30))
 load_button = pygame.transform.scale(load_button, (30, 30))
+restart_button = pygame.transform.scale(restart_button, (30, 30))
 
 # expand size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
@@ -122,7 +125,8 @@ if(board.get_board_size() == 9):
         23: (308, 308),
         24: (550,22), # replay button
         25: (550, 122), # save button
-        26: (550, 222) # load button
+        26: (550, 222), # load button
+        27: (550, 322) # restart button
     }
 elif(board.get_board_size() == 6):
     coords = {
@@ -144,7 +148,8 @@ elif(board.get_board_size() == 6):
         15: (460, 463),
         16: (550, 22), # replay button
         17: (550, 122), # save button
-        18: (550, 222) # load button
+        18: (550, 222), # load button
+        19: (550, 322) # restart button
     }
 elif(board.get_board_size() == 3):
     coords = {
@@ -159,7 +164,8 @@ elif(board.get_board_size() == 3):
         8: (445, 443),
         9: (550, 22), # replay button
         10: (550, 122), # save button
-        11: (550, 222) # load button
+        11: (550, 222), # load button
+        12: (550, 322) # restart button
     }
 
 replay_coords = {
@@ -184,7 +190,7 @@ RED = (255, 0, 0)
 
 
 # Functions to draw the game state
-def draw_board(screen, board_img, positions, coords,replay,play):
+def draw_board(screen, board_img, positions, coords, replay, play):
     try:
         # Draw the background board
         screen.blit(board_img.convert(), (0, 0))
@@ -207,6 +213,15 @@ def draw_board(screen, board_img, positions, coords,replay,play):
                 screen.blit(leafImg.convert_alpha(), (x, y))
             elif value == 2:
                 screen.blit(fireImg.convert_alpha(), (x, y))
+        # draw the restart game button
+        restart_btn_coord = None
+        if(board.get_board_size() == 3):
+            restart_btn_coord = coords[12]
+        elif(board.get_board_size() == 6):
+            restart_btn_coord = coords[19]
+        elif(board.get_board_size() == 9):
+            restart_btn_coord = coords[27]
+        screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
         # Draw replay button
         if replay == False and play == False:
             replay_btn_coord = None
@@ -227,7 +242,6 @@ def draw_board(screen, board_img, positions, coords,replay,play):
             screen.blit(replay_button.convert_alpha(), (replay_btn_coord))
             screen.blit(save_button.convert_alpha(), (save_btn_coord))
             screen.blit(load_button.convert_alpha(), (load_btn_coord))
-
         if replay == True and play == False:
             screen.blit(rewind_button.convert_alpha(), (replay_coords[1]))
             screen.blit(play_button.convert_alpha(), (replay_coords[2]))
@@ -239,6 +253,8 @@ def draw_board(screen, board_img, positions, coords,replay,play):
             screen.blit(back_button.convert_alpha(), (play_coords[3]))
     except Exception as e:
         print(f"Error drawing the board: {e}")
+
+
 
 def draw_game_info(screen, game_functions, gameover, removepos, replay):
     # Display the variables from the Board class
@@ -442,6 +458,10 @@ def game_loop(variable_load):
                                         elif(idx == 26):
                                             board.load()
                                             break
+                                        elif(gameover and idx == 27):
+                                            board.new_restart_game()
+                                            gameover = False
+                                            break
                                     elif(board.get_board_size() == 6):
                                         if(idx == 16):
                                             currentstuff = set_replay(idx)
@@ -453,6 +473,10 @@ def game_loop(variable_load):
                                         elif(idx == 18):
                                             board.load()
                                             break
+                                        elif(gameover and idx == 19):
+                                            board.new_restart_game()
+                                            gameover = False
+                                            break
                                     elif(board.get_board_size() == 3):
                                         if(idx == 9):
                                             currentstuff = set_replay(idx)
@@ -463,6 +487,10 @@ def game_loop(variable_load):
                                             break
                                         elif(idx == 11):
                                             board.load()
+                                            break
+                                        elif(gameover and idx == 12):
+                                            board.new_restart_game()
+                                            gameover = False
                                             break
                                     if removepos == True:
                                         if board.form_mill(idx):
@@ -542,6 +570,7 @@ def game_loop(variable_load):
                                                     else:
                                                         startpos = None
                                                         endpos = None
+                            break
             if play == True:
                 for event in pygame.event.get():
                     print(f"Event: {event}")  # This will print out each event captured
@@ -587,7 +616,7 @@ def game_loop(variable_load):
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            print("removepos: ", removepos)
+            #print("removepos: ", removepos)
             #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
