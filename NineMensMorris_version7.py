@@ -186,7 +186,7 @@ class Game_Functions(Board):
             return False
 
     def move_piece(self, current_position, move_to):
-        upper_limit = 0
+        upper_limit = None
         if(self.get_board_size() == 9):
             upper_limit = 23
         elif(self.get_board_size() == 6):
@@ -194,6 +194,7 @@ class Game_Functions(Board):
         elif(self.get_board_size() == 3):
             upper_limit = 8
     
+        print("Upper limit: ", upper_limit)
         if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
             if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
@@ -270,28 +271,6 @@ class Game_Functions(Board):
                 return True
         elif newly_formed_mills and self.get_board_size() == 3:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-
-    def form_mill(self, position):
-        mill_combinations = [
-        [0, 1, 2], [2, 4, 7], [5, 6, 7],
-        [0, 3, 5], [8, 9, 10], [10, 12, 15],
-        [13, 14, 15], [8, 11, 13],
-        [16, 17, 18], [18, 20, 23], [21, 22, 23],
-        [16, 19, 21], [1, 9, 17], [20, 12, 4],
-        [22, 14, 6], [3, 11, 19]
-        ]
-        newly_formed_mills = []
-
-        for combo in mill_combinations:
-            if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
-                if combo not in self.get_active_mills():
-                    newly_formed_mills.append(combo)
-
-        if newly_formed_mills:
-            if self.remove_piece(position):
-                self.set_active_mills(self.get_active_mills() + newly_formed_mills)
-                return True
-
     def form_mill_GUI(self):
         mill_combinations = None
         if(self.get_board_size() == 3):
@@ -329,7 +308,29 @@ class Game_Functions(Board):
                     newly_formed_mills.append(combo)
                     return True 
         return False
+    
 
+
+    #def form_mill(self, position):
+    #    mill_combinations = [
+    #       [0, 1, 2], [2, 4, 7], [5, 6, 7],
+    #    [0, 3, 5], [8, 9, 10], [10, 12, 15],
+    #    [13, 14, 15], [8, 11, 13],
+    #    [16, 17, 18], [18, 20, 23], [21, 22, 23],
+    #    [16, 19, 21], [1, 9, 17], [20, 12, 4],
+    #    [22, 14, 6], [3, 11, 19]
+    #    ]
+    #    newly_formed_mills = []
+
+    #    for combo in mill_combinations:
+    #        if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
+    #           if combo not in self.get_active_mills():
+    #                newly_formed_mills.append(combo)
+
+    #    if newly_formed_mills:
+    #        if self.remove_piece(position):
+    #            self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+    #            return True
 
     def opposite_player_turn(self):
         if self.get_player_turn() == 1:
@@ -367,12 +368,12 @@ class Game_Functions(Board):
 
     def save_current_state_to_log(self):
         state = {
+            'board_size': self.get_board_size(),
             'positions': copy.deepcopy(self.get_positions()),
             'player_turn': self.get_player_turn(),
             'active_mills': copy.deepcopy(self.get_active_mills()),
             'remaining_turns': self.get_remaining_turns(),
             'permissible_moves': self.get_permissible_moves(),
-            'board_size': self.get_board_size()
         }
         print("State before appending to temp_log:", state)  # Debug statement
         self.__temp_log.append(state)
@@ -416,13 +417,13 @@ class Game_Functions(Board):
             return
 
         state = self.__temp_log[-1]  # Now it's safe to access the last element
-
+    
+        self.set_board_size(state['board_size'])
         self.set_positions(state['positions'])
         self.set_player_turn(state['player_turn'])
         self.set_active_mills(state['active_mills'])
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
-        self.set_board_size(state['board_size'])
 
         #self.printBoard()
         print("Board state loaded from log.")

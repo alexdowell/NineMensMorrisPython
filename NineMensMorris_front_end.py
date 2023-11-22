@@ -30,7 +30,7 @@ variable_load = variable_load.read()
 
 # set up new board
 # if variable_load == 'False':
-board_size = 9
+#board_size = 9
 
 # extract board size from system (from previous screen)
 if(len(sys.argv) > 1):
@@ -38,7 +38,7 @@ if(len(sys.argv) > 1):
 # Global Variables
 board = Game_Functions()
 # set up board
-#board.set_board_size(9)
+# board.set_board_size(9)
 
 board.set_board_size(board_size)
 board.set_positions_diff()
@@ -245,14 +245,17 @@ def draw_game_info(screen, game_functions, gameover):
     if gameover == True:
         texts = [
         f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
-    ]
+        ]
+    
     if gameover == False:
         texts = [
+            f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
             f"Positions: {game_functions.get_positions()}",
-            f"Player Turn: {game_functions.get_player_turn()}",
+            #f"Player Turn: {game_functions.get_player_turn()}",
             f"Active Mills: {game_functions.get_active_mills()}",
             f"Remaining Turns: {game_functions.get_remaining_turns()}",
         ]
+    
 
     for i, text in enumerate(texts):
         textsurface = myfont.render(text, False, (0, 0, 0))
@@ -362,8 +365,8 @@ def game_loop(variable_load):
                         print("Quit event detected. Closing game window...")
                         running = False
                         break
-                    print("event.type: ", event.type)
-                    print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
+                    #print("event.type: ", event.type)
+                    #print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
                     if event.type == pygame.MOUSEBUTTONUP:
                         if replay == True:
                             for idx, rect in enumerate(replay_clickables):
@@ -374,11 +377,11 @@ def game_loop(variable_load):
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
                                     if idx == 0: # rewind a move button
-                                        print("here rewind")
+                                        #print("here rewind")
                                         replay_state = replay_handler(idx, currentstuff[0], replay_state, currentstuff[1])
                                         break
                                     if idx == 1: # play button
-                                        print("here play")
+                                        #print("here play")
                                         play_loop = 0
                                         play = True
                                         play_length = len(currentstuff[0])
@@ -386,11 +389,11 @@ def game_loop(variable_load):
                                         break
 
                                     if idx == 2: # fast forward
-                                        print("here fast forward")
+                                        #print("here fast forward")
                                         replay_state = replay_handler(idx  , currentstuff[0], replay_state, currentstuff[1])
                                         break
                                     if idx == 3: # exit replay button
-                                        print("here exit replay")
+                                        #print("here exit replay")
                                         replay_handler(idx  , currentstuff[0],  replay_state, currentstuff[1])
                                         replay = False
                                         break
@@ -423,41 +426,42 @@ def game_loop(variable_load):
                                             break
                                         break
                                     if board.get_remaining_turns() != 0:
-                                        print("here2")
-                                        print(f"Clicked on position: {idx}")
+                                        #print("here2")
+                                        #print(f"Clicked on position: {idx}")
                                         if board.place_piece(idx):
                                             board.check_remove_active_mill()
-                                            print("here passed place piece")
+                                            #print("here passed place piece")
                                             if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                 removepos = True
                                                 break
                                             elif board.form_mill_GUI() and board.get_board_size() == 3:
-                                                print("Game over!")
+                                                #print("Game over!")
                                                 board.save_current_state_to_log()
-                                                print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                 gameover = True
                                                 break
                                             board.save_current_state_to_log()
-                                            print("Form mill GUI = ", board.form_mill_GUI())
-                                            print("Board size: ", board.get_board_size())
+                                            #print("Form mill GUI = ", board.form_mill_GUI())
+                                            #print("Board size: ", board.get_board_size())
                                             break
                                     if board.get_remaining_turns() == 0:
                                             if board.is_game_over():
-                                                print("Game over!")
-                                                print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                #print("Game over!")
+                                                #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                 gameover = True
                                                 break
-                                            
                                             if startpos == None:
                                                 startpos = idx
-                                                print("startpos: ", startpos)
+                                                #print("startpos: ", startpos)
+                                                print("Starting position (piece selected to move): ", startpos)
                                                 break
                                             else:
                                                 if startpos == idx:
                                                     break
                                                 endpos = idx
-                                                print("endpos: ", endpos)
-                                                if board.player_piece_count() == 3:
+                                                print("Ending position (position to move to): ", endpos)
+                                                #print("endpos: ", endpos)
+                                                if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                     if board.fly_piece(startpos, endpos):
                                                         board.check_remove_active_mill()
                                                         if board.form_mill_GUI():
@@ -474,14 +478,15 @@ def game_loop(variable_load):
                                                         endpos = None
                                                 else:
                                                     if board.move_piece(startpos, endpos):
+                                                        print("Moved piece from ", startpos, "to ", endpos)
                                                         board.check_remove_active_mill()
                                                         if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                             removepos = True
                                                             break
                                                         elif board.form_mill_GUI() and board.get_board_size() == 3:
-                                                            print("Game over!")
+                                                            #print("Game over!")
                                                             board.save_current_state_to_log()
-                                                            print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                            #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                             gameover = True
                                                             break
                                                         board.save_current_state_to_log()
@@ -496,7 +501,6 @@ def game_loop(variable_load):
                     print(f"Event: {event}")  # This will print out each event captured
                     if event.type == pygame.QUIT:
                         print("Quit event detected. Closing game window...")
-                        board.cleanup()
                         running = False
                         break
                         
@@ -537,8 +541,8 @@ def game_loop(variable_load):
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            print("removepos: ", removepos)
-            print("Print test: ", test)
+            #print("removepos: ", removepos)
+            #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
             # print("board positions: ", board.get_positions())
@@ -586,6 +590,12 @@ def game_loop(variable_load):
 
             # Frame rate
             clock.tick(60)
+
+            # Game status
+            if(board.get_remaining_turns() != 0):
+                print("***** PLACE PIECE PHASE *****")
+            elif(board.get_remaining_turns() == 0):
+                print("***** MOVE PIECE PHASE *****")
             
         except Exception as e:
             print(f"Error in game loop: {e}")
