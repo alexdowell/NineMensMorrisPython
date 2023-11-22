@@ -240,18 +240,27 @@ def draw_board(screen, board_img, positions, coords,replay,play):
     except Exception as e:
         print(f"Error drawing the board: {e}")
 
-def draw_game_info(screen, game_functions, gameover, removepos):
+def draw_game_info(screen, game_functions, gameover, removepos, replay):
     # Display the variables from the Board class
     if gameover == True:
-        texts = [
-        f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
-        ]
+        if(replay):
+            texts = [
+                f"In Replay Mode"
+            ]
+        else:
+            texts = [
+                f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
+            ]
     if gameover == False:
         if(game_functions.get_remaining_turns() != 0):
             if(removepos):
                 texts = [
                     f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
                     f"Select an opponent's piece to remove from the board."
+                ]
+            elif(replay):
+                texts = [
+                    f"In Replay Mode"
                 ]
             else:
                 texts = [
@@ -264,6 +273,10 @@ def draw_game_info(screen, game_functions, gameover, removepos):
                 texts = [
                     f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
                     f"Select an opponent's piece to remove from the board."
+                ]
+            elif(replay):
+                texts = [
+                    f"In Replay Mode"
                 ]
             else:
                 texts = [
@@ -368,7 +381,6 @@ def game_loop(variable_load):
     pause = False
     sleep = False
     boardImg = None
-    test = True
     while running:
         try:
             # Event handling
