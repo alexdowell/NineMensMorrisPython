@@ -628,7 +628,7 @@ def game_loop(variable_load):
                 sleep = False
             
             #print("Calling draw_game_info()...")
-            draw_game_info(screen, board, gameover, removepos)
+            draw_game_info(screen, board, gameover, removepos, replay)
 
             # Updating the display
             #print("Updating display...")
