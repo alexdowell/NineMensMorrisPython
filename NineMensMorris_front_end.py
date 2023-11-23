@@ -7,8 +7,46 @@ import pygame
 from NineMensMorris_version7 import Game_Functions as Game_Functions
 
 DEBUG = True
+
 # Global Variables
 board = Game_Functions()
+
+# look if the load_game.txt file exists and if it doesn't exist, then create it and save variable_load == false in it
+if not os.path.exists("load_game.txt"):
+    variable_load = 'False'
+    
+    # save load == false in load_game.txt
+    variable_load = open("load_game.txt", "w+")
+    variable_load.write('False')
+
+# open("load_game.txt", "w+")
+# read data in load_game.txt if load_game.txt is empty, then create load == true
+# if load_game.txt is not empty, then create load == false
+
+# open load_game.txt and save the data in load variable
+variable_load = open("load_game.txt", "r")
+variable_load = variable_load.read()
+
+
+# set up new board
+# if variable_load == 'False':
+#board_size = 9
+board_size = 0
+# extract board size from system (from previous screen)
+if(len(sys.argv) > 1):
+    board_size = int(sys.argv[1])
+# Global Variables
+board = Game_Functions()
+# set up board
+# board.set_board_size(9)
+
+board.set_board_size(board_size)
+board.set_initial_positions()
+board.set_player_turn(1)
+board.set_initial_remaining_turns()
+board.set_initial_permissible_moves()
+
+
 pygame.font.init()  # you have to call this at the start, 
                     # if you want to use this module.
 myfont = pygame.font.SysFont('Arial', 18)
@@ -21,13 +59,18 @@ screen = pygame.display.set_mode((600, 750))
 
 pygame.display.set_caption("Nine Men Morris")
 print("game window initialized")
-# nine mens morris board image 
-boardImg = pygame.image.load('morrisbig.png') 
+# nine mens morris board images (3 mens, 6 mens, 9 mens)
+boardImg3 = pygame.image.load('3mens.png')
+boardImg6 = pygame.image.load('6mens.png')
+boardImg9 = pygame.image.load('9mens.png')
+
 # avatar images
 leafImg = pygame.image.load('player1_30x30.png')
 fireImg = pygame.image.load('player2_30x30.png')
 highImg = pygame.image.load('high.png')
 roboImg = pygame.image.load('robo1.png')
+# restart button
+restart_button = pygame.image.load('restart.png')
 # replay buttons
 play_button = pygame.image.load('play_button.png')
 pause_button = pygame.image.load('pause_button.png')
@@ -35,6 +78,8 @@ rewind_button = pygame.image.load('rewind_button.png')
 fast_forward_button = pygame.image.load('fast_forward_button.png')
 back_button = pygame.image.load('back_button.png')
 replay_button = pygame.image.load('replay_button.png')
+save_button = pygame.image.load('save_button.png')
+load_button = pygame.image.load('load_button.png')
 # rduce size of of the replay button images
 play_button = pygame.transform.scale(play_button, (30, 30))
 pause_button = pygame.transform.scale(pause_button, (30, 30))
@@ -42,35 +87,87 @@ rewind_button = pygame.transform.scale(rewind_button, (30, 30))
 fast_forward_button = pygame.transform.scale(fast_forward_button, (30, 30))
 back_button = pygame.transform.scale(back_button, (30, 30))
 replay_button = pygame.transform.scale(replay_button, (30, 30))
+save_button = pygame.transform.scale(save_button, (30, 30))
+load_button = pygame.transform.scale(load_button, (30, 30))
+restart_button = pygame.transform.scale(restart_button, (30, 30))
+
+# expand size of 3 mens and 6 mens boards
+boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
+boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
 # coordinates of each board position in Board and corresponding position in the nine mens morris board image
 print("images loaded")
-coords = {
-    0: (22, 22), # positions 0-23 are the 24 positions on the board
-    1: (230, 22),
-    2: (450, 22),
-    3: (22, 240),
-    4: (450, 240),
-    5: (22, 450),
-    6: (230, 450),
-    7: (450, 450),
-    8: (95, 95),
-    9: (230, 95),
-    10: (380, 95),
-    11: (95, 240),
-    12: (380, 240),
-    13: (95, 378),
-    14: (230, 378),
-    15: (380, 378),
-    16: (162, 169),
-    17: (230, 169),
-    18: (308, 169),
-    19: (162, 240),
-    20: (308, 240),
-    21: (162, 308),
-    22: (230, 308),
-    23: (308, 308),
-    24: (550,22), # replay button
-}
+coords = {}
+if(board.get_board_size() == 9):
+    coords = {
+        0: (22, 22), # positions 0-23 are the 24 positions on the board
+        1: (230, 22),
+        2: (450, 22),
+        3: (22, 240),
+        4: (450, 240),
+        5: (22, 450),
+        6: (230, 450),
+        7: (450, 450),
+        8: (95, 95),
+        9: (230, 95),
+        10: (380, 95),
+        11: (95, 240),
+        12: (380, 240),
+        13: (95, 378),
+        14: (230, 378),
+        15: (380, 378),
+        16: (162, 169),
+        17: (230, 169),
+        18: (308, 169),
+        19: (162, 240),
+        20: (308, 240),
+        21: (162, 308),
+        22: (230, 308),
+        23: (308, 308),
+        24: (550,22), # replay button
+        25: (550, 122), # save button
+        26: (550, 222), # load button
+        27: (550, 322) # restart button
+    }
+elif(board.get_board_size() == 6):
+    coords = {
+        0: (12, 16),
+        1: (235, 16),
+        2: (460, 16),
+        3: (125, 130),
+        4: (235, 130),
+        5: (348, 130),
+        6: (12, 240),
+        7: (125, 240),
+        8: (348, 240),
+        9: (460, 240),
+        10: (125, 350),
+        11: (235, 350),
+        12: (348, 350),
+        13: (12, 463),
+        14: (235, 463),
+        15: (460, 463),
+        16: (550, 22), # replay button
+        17: (550, 122), # save button
+        18: (550, 222), # load button
+        19: (550, 322) # restart button
+    }
+elif(board.get_board_size() == 3):
+    coords = {
+        0: (33, 34),
+        1: (238, 34),
+        2: (443, 34),
+        3: (33, 240),
+        4: (238, 240),
+        5: (445, 240),
+        6: (33, 443),
+        7: (238, 443),
+        8: (445, 443),
+        9: (550, 22), # replay button
+        10: (550, 122), # save button
+        11: (550, 222), # load button
+        12: (550, 322) # restart button
+    }
+
 replay_coords = {
     1: (22, 550),  # rewind a move button
     2: (169, 550), # play button
@@ -93,7 +190,7 @@ RED = (255, 0, 0)
 
 
 # Functions to draw the game state
-def draw_board(screen, board_img, positions, coords,replay,play):
+def draw_board(screen, board_img, positions, coords, replay, play, startpos):
     try:
         # Draw the background board
         screen.blit(board_img.convert(), (0, 0))
@@ -116,9 +213,39 @@ def draw_board(screen, board_img, positions, coords,replay,play):
                 screen.blit(leafImg.convert_alpha(), (x, y))
             elif value == 2:
                 screen.blit(fireImg.convert_alpha(), (x, y))
+        #Highlight with green rectangle the selected piece
+        if startpos != None:
+            x, y = coords[startpos]
+            pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
+        # draw the restart game button
+        restart_btn_coord = None
+        if(board.get_board_size() == 3):
+            restart_btn_coord = coords[12]
+        elif(board.get_board_size() == 6):
+            restart_btn_coord = coords[19]
+        elif(board.get_board_size() == 9):
+            restart_btn_coord = coords[27]
+        screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
         # Draw replay button
         if replay == False and play == False:
-            screen.blit(replay_button.convert_alpha(), (coords[24]))
+            replay_btn_coord = None
+            save_btn_coord = None
+            load_btn_coord = None
+            if(board.get_board_size() == 3):
+                replay_btn_coord = coords[9]
+                save_btn_coord = coords[10]
+                load_btn_coord = coords[11]
+            elif(board.get_board_size() == 6):
+                replay_btn_coord = coords[16]
+                save_btn_coord = coords[17]
+                load_btn_coord = coords[18]
+            elif(board.get_board_size() == 9):
+                replay_btn_coord = coords[24]
+                save_btn_coord = coords[25]
+                load_btn_coord = coords[26]
+            screen.blit(replay_button.convert_alpha(), (replay_btn_coord))
+            screen.blit(save_button.convert_alpha(), (save_btn_coord))
+            screen.blit(load_button.convert_alpha(), (load_btn_coord))
         if replay == True and play == False:
             screen.blit(rewind_button.convert_alpha(), (replay_coords[1]))
             screen.blit(play_button.convert_alpha(), (replay_coords[2]))
@@ -131,19 +258,52 @@ def draw_board(screen, board_img, positions, coords,replay,play):
     except Exception as e:
         print(f"Error drawing the board: {e}")
 
-def draw_game_info(screen, game_functions, gameover):
+
+
+def draw_game_info(screen, game_functions, gameover, removepos, replay):
     # Display the variables from the Board class
     if gameover == True:
-        texts = [
-        f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!"
-    ]
+        if(replay):
+            texts = [
+                f"In Replay Mode"
+            ]
+        else:
+            texts = [
+                f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
+                f"Close window to change game settings or click Restart"
+            ]
     if gameover == False:
-        texts = [
-            f"Positions: {game_functions.get_positions()}",
-            f"Player Turn: {game_functions.get_player_turn()}",
-            f"Active Mills: {game_functions.get_active_mills()}",
-            f"Remaining Turns: {game_functions.get_remaining_turns()}",
-        ]
+        if(game_functions.get_remaining_turns() != 0):
+            if(removepos):
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    f"Select an opponent's piece to remove from the board."
+                ]
+            elif(replay):
+                texts = [
+                    f"In Replay Mode"
+                ]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    f"Remaining Turns: {game_functions.get_remaining_turns()}"
+                ]
+
+        elif(game_functions.get_remaining_turns() == 0):
+            if(removepos):
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    f"Select an opponent's piece to remove from the board."
+                ]
+            elif(replay):
+                texts = [
+                    f"In Replay Mode"
+                ]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    f"It's time to move pieces! Select a piece to move then select the position you want to move to."
+                ]
 
     for i, text in enumerate(texts):
         textsurface = myfont.render(text, False, (0, 0, 0))
@@ -165,11 +325,12 @@ def set_replay(idx):
 
     # Save current state
     current_state = {
+        'board_size': board.get_board_size(),
         'positions': board.get_positions(),
         'player_turn': board.get_player_turn(),
         'active_mills': board.get_active_mills(),
         'remaining_turns': board.get_remaining_turns(),
-        'permissible_moves': board.get_permissible_moves()
+        'permissible_moves': board.get_permissible_moves(),
     }
     currentstuff = [log,current_state]
     return currentstuff
@@ -190,6 +351,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
             index = 0
             replay_state = index
         state = log[index]
+        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -206,6 +368,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
         print("log length: ", len(log))
         print("index: ", index)
         state = log[index]
+        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -215,18 +378,19 @@ def replay_handler(replay_option,log,replay_state,current_state):
     if replay_option == 3: # exit replay button
         #reset current state
         current_state = current_state
+        board.set_board_size(state['board_size'])
         board.set_positions(current_state['positions'])
         board.set_player_turn(current_state['player_turn'])
         board.set_active_mills(current_state['active_mills'])
         board.set_remaining_turns(current_state['remaining_turns'])
 
-def game_loop():
+def game_loop(variable_load):
 
     print("Initializing game window...")
     screen.fill(WHITE)
     clock = pygame.time.Clock()
 
-    print("Entering main game loop...")
+    #print("Entering main game loop...")
     running = True
     startpos = None
     endpos = None
@@ -237,21 +401,19 @@ def game_loop():
     play = False
     pause = False
     sleep = False
+    boardImg = None
     while running:
         try:
-            # Event handling
             if play == False:
+                # Event handling
                 for event in pygame.event.get():
-
                     print(f"Event: {event}")  # This will print out each event captured
                     if event.type == pygame.QUIT:
                         print("Quit event detected. Closing game window...")
-                        board.cleanup()
                         running = False
                         break
-                        
-                    print("event.type: ", event.type)
-                    print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
+                    #print("event.type: ", event.type)
+                    #print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
                     if event.type == pygame.MOUSEBUTTONUP:
                         if replay == True:
                             for idx, rect in enumerate(replay_clickables):
@@ -262,11 +424,11 @@ def game_loop():
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
                                     if idx == 0: # rewind a move button
-                                        print("here rewind")
+                                        #print("here rewind")
                                         replay_state = replay_handler(idx, currentstuff[0], replay_state, currentstuff[1])
                                         break
                                     if idx == 1: # play button
-                                        print("here play")
+                                        #print("here play")
                                         play_loop = 0
                                         play = True
                                         play_length = len(currentstuff[0])
@@ -274,11 +436,11 @@ def game_loop():
                                         break
 
                                     if idx == 2: # fast forward
-                                        print("here fast forward")
+                                        #print("here fast forward")
                                         replay_state = replay_handler(idx  , currentstuff[0], replay_state, currentstuff[1])
                                         break
                                     if idx == 3: # exit replay button
-                                        print("here exit replay")
+                                        #print("here exit replay")
                                         replay_handler(idx  , currentstuff[0],  replay_state, currentstuff[1])
                                         replay = False
                                         break
@@ -290,44 +452,95 @@ def game_loop():
                                 # print("here1")
                                 # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
-                                    if idx == 24:
-                                        currentstuff = set_replay(idx)
-                                        replay = True
-                                        break
+                                    if(board.get_board_size() == 9):
+                                        if(idx == 24):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 25):
+                                            board.save()
+                                            break
+                                        elif(idx == 26):
+                                            board.load()
+                                            break
+                                        elif(idx == 27):
+                                            board.new_restart_game()
+                                            gameover = False
+                                            break
+                                    elif(board.get_board_size() == 6):
+                                        if(idx == 16):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 17):
+                                            board.save()
+                                            break
+                                        elif(idx == 18):
+                                            board.load()
+                                            break
+                                        elif(idx == 19):
+                                            board.new_restart_game()
+                                            gameover = False
+                                            break
+                                    elif(board.get_board_size() == 3):
+                                        if(idx == 9):
+                                            currentstuff = set_replay(idx)
+                                            replay = True
+                                            break
+                                        elif(idx == 10):
+                                            board.save()
+                                            break
+                                        elif(idx == 11):
+                                            board.load()
+                                            break
+                                        elif(idx == 12):
+                                            board.new_restart_game()
+                                            gameover = False
+                                            break
                                     if removepos == True:
-                                                board_positions_now = board.get_positions()
-                                                if board.form_mill(idx):
-                                                    board.check_remove_active_mill()
-                                                    removepos = False
-                                                    board.save_current_state_to_log()
-                                                    break
-                                                break
+                                        if board.form_mill(idx):
+                                            board.check_remove_active_mill()
+                                            removepos = False
+                                            board.save_current_state_to_log()
+                                            break
+                                        break
                                     if board.get_remaining_turns() != 0:
-                                        print("here2")
-                                        print(f"Clicked on position: {idx}")
+                                        #print("here2")
+                                        #print(f"Clicked on position: {idx}")
                                         if board.place_piece(idx):
                                             board.check_remove_active_mill()
-                                            if board.form_mill_GUI():
+                                            #print("here passed place piece")
+                                            if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                 removepos = True
                                                 break
+                                            elif board.form_mill_GUI() and board.get_board_size() == 3:
+                                                #print("Game over!")
+                                                board.save_current_state_to_log()
+                                                #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                gameover = True
+                                                break
                                             board.save_current_state_to_log()
+                                            #print("Form mill GUI = ", board.form_mill_GUI())
+                                            #print("Board size: ", board.get_board_size())
                                             break
                                     if board.get_remaining_turns() == 0:
                                             if board.is_game_over():
-                                                print("Game over!")
-                                                print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                #print("Game over!")
+                                                #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                 gameover = True
                                                 break
                                             if startpos == None:
                                                 startpos = idx
-                                                print("startpos: ", startpos)
+                                                #print("startpos: ", startpos)
+                                                #print("Starting position (piece selected to move): ", startpos)
                                                 break
                                             else:
                                                 if startpos == idx:
                                                     break
                                                 endpos = idx
-                                                print("endpos: ", endpos)
-                                                if board.player_piece_count() == 3:
+                                                #print("Ending position (position to move to): ", endpos)
+                                                #print("endpos: ", endpos)
+                                                if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                     if board.fly_piece(startpos, endpos):
                                                         board.check_remove_active_mill()
                                                         if board.form_mill_GUI():
@@ -344,11 +557,16 @@ def game_loop():
                                                         endpos = None
                                                 else:
                                                     if board.move_piece(startpos, endpos):
+                                                        print("Moved piece from ", startpos, "to ", endpos)
                                                         board.check_remove_active_mill()
-                                                        if board.form_mill_GUI():
+                                                        if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                             removepos = True
-                                                            startpos = None
-                                                            endpos = None
+                                                            break
+                                                        elif board.form_mill_GUI() and board.get_board_size() == 3:
+                                                            #print("Game over!")
+                                                            board.save_current_state_to_log()
+                                                            #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
+                                                            gameover = True
                                                             break
                                                         board.save_current_state_to_log()
                                                         startpos = None
@@ -357,12 +575,12 @@ def game_loop():
                                                     else:
                                                         startpos = None
                                                         endpos = None
+                            break
             if play == True:
                 for event in pygame.event.get():
                     print(f"Event: {event}")  # This will print out each event captured
                     if event.type == pygame.QUIT:
                         print("Quit event detected. Closing game window...")
-                        board.cleanup()
                         running = False
                         break
                         
@@ -390,6 +608,7 @@ def game_loop():
                     counter = time.time()
                     sleep = True
                 state = currentstuff[0][play_loop]
+                board.set_board_size(state['board_size'])
                 board.set_positions(state['positions'])
                 board.set_player_turn(state['player_turn'])
                 board.set_active_mills(state['active_mills'])
@@ -402,7 +621,8 @@ def game_loop():
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            # print("removepos: ", removepos)
+            #print("removepos: ", removepos)
+            #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
             # print("board positions: ", board.get_positions())
@@ -411,14 +631,38 @@ def game_loop():
             # print("remaining turns: ", board.get_remaining_turns())
             # Drawing the game state
             #print("Calling draw_board()...")
+
+            if variable_load == 'True':
+                board.load()
+                
+                # save load == false in load_game.txt
+                variable_load = open("load_game.txt", "w+")
+                variable_load.write('False')
+                variable_load.close()
+                
+                variable_load = 'False'
+
+                print(f'This is: {variable_load}')
+
+                # open("load_game.txt", "r")
+                # variable_load = variable_load.read()
+                # print(variable_load)
+            
             screen.fill(WHITE)
-            draw_board(screen, boardImg, board.get_positions(), coords, replay, play)
+            if(board.get_board_size() == 9):
+                boardImg = boardImg9
+            elif(board.get_board_size() == 6):
+                boardImg = boardImg6
+            elif(board.get_board_size() == 3):
+                boardImg = boardImg3
+            
+            draw_board(screen, boardImg, board.get_positions(), coords, replay, play, startpos)
             if sleep == True:
                 time.sleep(1)
                 sleep = False
             
             #print("Calling draw_game_info()...")
-            draw_game_info(screen, board, gameover)
+            draw_game_info(screen, board, gameover, removepos, replay)
 
             # Updating the display
             #print("Updating display...")
@@ -426,16 +670,15 @@ def game_loop():
 
             # Frame rate
             clock.tick(60)
+            
         except Exception as e:
             print(f"Error in game loop: {e}")
             running = False
 
     print("Exiting game...")
-    # remove temp file
-    board.cleanup()
 
     pygame.quit()
     sys.exit()
 
 
-game_loop()
+game_loop(variable_load)
