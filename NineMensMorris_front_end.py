@@ -30,8 +30,8 @@ variable_load = variable_load.read()
 
 # set up new board
 # if variable_load == 'False':
-#board_size = 9
-board_size = 0
+board_size = 9
+# board_size = 0
 # extract board size from system (from previous screen)
 if(len(sys.argv) > 1):
     board_size = int(sys.argv[1])

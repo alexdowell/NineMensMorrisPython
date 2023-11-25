@@ -75,7 +75,10 @@ class GameModes:
         if(isinstance(int(board_size), numbers.Number) and
            (int(board_size) == 3 or int(board_size) == 6 or int(board_size) == 9)):
             self.game.set_board_size(int(board_size))
-            command = ['python', 'NineMensMorris_front_end.py', board_size]
+            computer = str(0)
+            board_size = str(board_size)
+            board_computer_variable = board_size + computer
+            command = ['python3', 'NineMensMorris_front_end_computer.py', board_computer_variable]
             subprocess.Popen(command)
             print("Starting Human vs Human Game")
         else:
@@ -86,19 +89,19 @@ class GameModes:
 
     def human_vs_computer(self):
         board_size = self.board_size_field.get()
-        '''
         if(isinstance(int(board_size), numbers.Number) and
            (int(board_size) == 3 or int(board_size) == 6 or int(board_size) == 9)):
             self.game.set_board_size(int(board_size))
-            command = ['python', 'NineMensMorris_front_end.py', board_size]
+            computer = str(1)
+            board_size = str(board_size)
+            board_computer_variable = board_size + computer
+            command = ['python3', 'NineMensMorris_front_end_computer.py', board_computer_variable]
             subprocess.Popen(command)
             print("Starting Human vs Computer Game")
         else:
             self.board_size_field.delete(0, len(self.board_size_field.get()))
             self.board_size_field.insert(0, "9")
             messagebox.showerror("Error", "Invalid Board Size. Please enter either 3, 6, or 9.")
-        
-        '''
 
 
     def nine_mens_morris(self):
@@ -151,7 +154,7 @@ class StartMenu(tk.Tk):
         variable_load = open("load_game.txt", "w+")
         variable_load.write('True')
 
-        command = ['python', 'NineMensMorris_front_end.py']
+        command = ['python3', 'NineMensMorris_front_end_computer.py']
         subprocess.Popen(command)
         print("Starting Human vs Human Game")
 
