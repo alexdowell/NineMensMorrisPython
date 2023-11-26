@@ -2,7 +2,6 @@ import numbers
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
-
 from NineMensMorris_version7 import Game_Functions
 
 

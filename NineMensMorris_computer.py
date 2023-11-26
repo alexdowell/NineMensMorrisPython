@@ -7,6 +7,8 @@ import sys
 import time
 
 
+import random
+
 class Board:
     def __init__(self):
         self.__board_size = None
@@ -26,7 +28,7 @@ class Board:
     # Getter for positions
     def get_positions(self):
         return self.__positions
-    
+
     # Setter for initial positions
     def set_initial_positions(self):
         if(self.get_board_size() == 3):
@@ -141,6 +143,14 @@ class Board:
     def set_permissible_moves(self, permissible_moves):
         self.__permissible_moves = permissible_moves
 
+
+class ComputerPlayer:
+    board = Board()
+    def __init__(self, board):
+        self.board = board
+
+    
+
 class Game_Functions(Board):
     TEMP_LOG_PATH = "temp_log.pkl"
     SAVED_LOG_PATH = "board_log.pkl"
@@ -148,6 +158,8 @@ class Game_Functions(Board):
         super().__init__()
         # Add this new member for the in-memory log
         self.__temp_log = []
+        # self.computer_player = ComputerPlayer(self)
+
 
         # Handle exit events
         #atexit.register(self.cleanup)
@@ -157,6 +169,21 @@ class Game_Functions(Board):
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
+
+    def set_game_mode(self, mode):
+    # mode is a string that can be either 'human' or 'computer'
+        self.__game_mode = mode
+
+    def play_turn(self):
+        # Check if it's the computer's turn and the game mode is 'computer'
+        if self.get_player_turn() == 2 or self.__game_mode == 'computer':
+            # self.computer_move_piece()
+
+            position = self.computer_player.make_move()
+            self.computer_place_piece(position)
+        # Otherwise, it's the human player's turn, and they would make their move through the GUI
+
+
 
     def is_occupied(self, position):
         return self.get_positions()[position] != 0
@@ -309,11 +336,15 @@ class Game_Functions(Board):
                     return True 
         return False
 
+    # def opposite_player_turn(self):
+    #     if self.get_player_turn() == 1:
+    #         return 2
+    #     else:
+    #         return 1
+
     def opposite_player_turn(self):
-        if self.get_player_turn() == 1:
-            return 2
-        else:
-            return 1
+        if not self.get_player_turn() == 1:
+            self.computer_place_piece()
 
     def check_remove_active_mill(self):
         mills_to_remove = []
@@ -343,6 +374,69 @@ class Game_Functions(Board):
         #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         return True
     
+    def computer_move_to(self): #picks a spot to move to
+        permissible_moves = self.get_permissible_moves()
+        empty_positions = [pos for pos, moves in permissible_moves.items() if not self.is_occupied(pos)]
+        return random.choice(empty_positions)
+
+    def computer_move_from(self): #picks a spot to move from
+        player2_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 2]
+        choice = True
+        while choice == True:
+            ranchoice = random.choice(player2_positions)
+            # select a permissible move list in the persmissible_moves dictionary with the key of ranchoice
+            permissible_move = self.get_permissible_moves()[ranchoice]
+
+            for position in permissible_move:
+                if self.is_occupied(position) == False:
+                    choice = False
+
+        return ranchoice
+    
+    def computer_fly_to(self): #picks a spot to move to
+        # pick a random position that is not occupied
+        empty_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 0]
+        return random.choice(empty_positions)
+    
+    
+    def computer_fly_piece(self):
+        current_position = self.computer_move_from()
+        move_to = self.computer_fly_to()
+        self.fly_piece(current_position, move_to)
+        print(f"Computer flew a piece from {current_position} to {move_to}")
+
+    def computer_place_piece(self):
+        position = self.computer_fly_to()
+        self.place_piece(position)
+        print("Computer placed a piece at position", position)
+
+    def computer_move_piece(self):
+        current_position = self.computer_move_from()
+        move_to = self.computer_move_to()
+        self.move_piece(current_position, move_to)
+        print(f"Computer moved a piece from {current_position} to {move_to}")
+
+
+    def play_game(self):
+        while not self.is_game_over() and not self.is_gridlocked():
+            # self.print_board()
+
+            if self.get_player_turn() == 1:
+                self.player_turn_actions()
+            else:
+                self.computer_turn_actions()
+
+            self.check_remove_active_mill()
+            self.save_current_state_to_log()
+
+        # self.print_board()
+        # self.print_winner()
+
+    def computer_turn_actions(self):
+        if self.get_remaining_turns() > 0:
+            self.computer_place_piece()
+        else:
+            self.computer_move_piece()
 
     def save_current_state_to_log(self):
         state = {
