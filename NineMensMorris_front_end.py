@@ -47,7 +47,7 @@ board.set_initial_remaining_turns()
 board.set_initial_permissible_moves()
 
 
-pygame.font.init()  # you have to call this at the start, 
+pygame.font.init()  # you have to call this at the start,
                     # if you want to use this module.
 myfont = pygame.font.SysFont('Arial', 18)
 # Initialize pygame
@@ -62,7 +62,8 @@ print("game window initialized")
 # nine mens morris board images (3 mens, 6 mens, 9 mens)
 boardImg3 = pygame.image.load('3mens.png')
 boardImg6 = pygame.image.load('6mens.png')
-boardImg9 = pygame.image.load('9mens.png')
+boardImg9 = pygame.image.load('dragon9mens.png')
+# analyze the size of boardImg9 and print the dimensions
 
 # avatar images
 leafImg = pygame.image.load('player1_30x30.png')
@@ -94,6 +95,7 @@ restart_button = pygame.transform.scale(restart_button, (30, 30))
 # expand size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
 boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
+boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 # coordinates of each board position in Board and corresponding position in the nine mens morris board image
 print("images loaded")
 coords = {}
@@ -217,6 +219,7 @@ def draw_board(screen, board_img, positions, coords, replay, play, startpos):
         if startpos != None:
             x, y = coords[startpos]
             pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
+            
         # draw the restart game button
         restart_btn_coord = None
         if(board.get_board_size() == 3):
@@ -663,6 +666,7 @@ def game_loop(variable_load):
             
             #print("Calling draw_game_info()...")
             draw_game_info(screen, board, gameover, removepos, replay)
+
 
             # Updating the display
             #print("Updating display...")
