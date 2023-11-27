@@ -8,9 +8,6 @@ from NineMensMorris_version7 import Game_Functions as Game_Functions
 
 DEBUG = True
 
-# Global Variables
-board = Game_Functions()
-
 # look if the load_game.txt file exists and if it doesn't exist, then create it and save variable_load == false in it
 if not os.path.exists("load_game.txt"):
     variable_load = 'False'
@@ -505,6 +502,8 @@ def game_loop(variable_load):
                                             board.check_remove_active_mill()
                                             removepos = False
                                             board.save_current_state_to_log()
+                                            if board.is_game_over() and board.get_remaining_turns() == 0 and (board.get_board_size() == 6 or board.get_board_size() == 9):
+                                                gameover = True
                                             break
                                         break
                                     if board.get_remaining_turns() != 0:
