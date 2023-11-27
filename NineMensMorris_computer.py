@@ -225,8 +225,10 @@ class Game_Functions(Board):
             if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
+                print("piece moved")
                 return True
         else:
+            print("piece not moved")
             return False
 
     def is_permissible(self, current_position, move_to):
@@ -292,11 +294,14 @@ class Game_Functions(Board):
                 if combo not in self.get_active_mills():
                     newly_formed_mills.append(combo)
         if newly_formed_mills and (self.get_board_size() == 6 or self.get_board_size() == 9):
+            print("positions before removing piece:", self.get_positions())
             if self.remove_piece(position):
+                print("positions after removing piece:", self.get_positions())
                 self.set_active_mills(self.get_active_mills() + newly_formed_mills)
                 return True
         elif newly_formed_mills and self.get_board_size() == 3:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
+
     def form_mill_GUI(self):
         mill_combinations = None
         if(self.get_board_size() == 3):
@@ -412,10 +417,17 @@ class Game_Functions(Board):
     def computer_move_piece(self):
         current_position = self.computer_move_from()
         move_to = self.computer_move_to(current_position)
+        print("move from: ", current_position)
+        print("move to: ", move_to)
+        print("positions: ", self.get_positions())
         selections = [current_position, move_to]
         self.move_piece(current_position, move_to)
         return selections
-        print(f"Computer moved a piece from {current_position} to {move_to}")
+    def computer_remove_piece(self):
+        player1_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 1]
+        ranchoice = random.choice(player1_positions)
+        return ranchoice
+
 
 
     def play_game(self):
@@ -448,9 +460,9 @@ class Game_Functions(Board):
             'remaining_turns': self.get_remaining_turns(),
             'permissible_moves': self.get_permissible_moves(),
         }
-        print("State before appending to temp_log:", state)  # Debug statement
+        #print("State before appending to temp_log:", state)  # Debug statement
         self.__temp_log.append(state)
-        print("all states in temp_log:", self.__temp_log)  # Debug statement
+        #print("all states in temp_log:", self.__temp_log)  # Debug statement
         self.persist_log('temp')  # Persist to temporary log
         self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
 

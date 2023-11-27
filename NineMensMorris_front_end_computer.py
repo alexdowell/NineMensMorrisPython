@@ -73,13 +73,18 @@ print("game window initialized")
 # nine mens morris board images (3 mens, 6 mens, 9 mens)
 boardImg3 = pygame.image.load('3mens.png')
 boardImg6 = pygame.image.load('6mens.png')
-boardImg9 = pygame.image.load('9mens.png')
+boardImg9 = pygame.image.load('dragon9mens.png')
 
 # avatar images
 leafImg = pygame.image.load('player1_30x30.png')
 fireImg = pygame.image.load('player2_30x30.png')
 highImg = pygame.image.load('high.png')
 roboImg = pygame.image.load('robo1.png')
+pantherimg = pygame.image.load('panther.png')
+pantherimg = pygame.transform.scale(pantherimg, (30, 30))
+dragonimg = pygame.image.load('dragon.png')
+dragonimg = pygame.transform.scale(dragonimg, (30, 30))
+
 # restart button
 restart_button = pygame.image.load('restart.png')
 # replay buttons
@@ -105,6 +110,7 @@ restart_button = pygame.transform.scale(restart_button, (30, 30))
 # expand size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
 boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
+boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 
 # game mode selection buttons
 single_player = pygame.image.load('single_player.png')
@@ -234,9 +240,9 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
         for pos, value in enumerate(positions):
             x, y = coords[pos]
             if value == 1:
-                screen.blit(leafImg.convert_alpha(), (x, y))
+                screen.blit(pantherimg.convert_alpha(), (x, y))
             elif value == 2:
-                screen.blit(fireImg.convert_alpha(), (x, y))
+                screen.blit(dragonimg.convert_alpha(), (x, y))
 
         #Highlight with green rectangle the selected piece
         if startpos != None:
@@ -608,6 +614,8 @@ def game_loop(variable_load, computer):
                                                             board.check_remove_active_mill()
                                                             if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                                                                 removepos = True
+                                                                startpos = None
+                                                                endpos = None
                                                                 break
                                                             elif board.form_mill_GUI() and board.get_board_size() == 3:
                                                                 #print("Game over!")
@@ -677,6 +685,7 @@ def game_loop(variable_load, computer):
 
                         if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             removepos = True
+                            remove_piece = board.computer_remove_piece()
 
                         if board.form_mill_GUI() and board.get_board_size() == 3:
                             print("Game over!")
@@ -685,9 +694,9 @@ def game_loop(variable_load, computer):
                             break
 
                         if removepos == True:
-                            idx = board.remove_piece() # gotta write the method for this
-                            if board.form_mill(idx):
+                            if board.form_mill(remove_piece):
                                 removepos = False
+                                board.check_remove_active_mill()
                                 break
                             break
                     if board.get_remaining_turns() == 0:
@@ -699,6 +708,9 @@ def game_loop(variable_load, computer):
 
                         if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             removepos = True
+                            remove_piece = board.computer_remove_piece()
+                            print("remove piece on: ", removepos)
+                            print("and the remove piece is: ", remove_piece)
 
                         if board.form_mill_GUI() and board.get_board_size() == 3:
                             print("Game over!")
@@ -707,9 +719,9 @@ def game_loop(variable_load, computer):
                             break
 
                         if removepos == True:
-                            idx = board.remove_piece() # gotta write the method for this
-                            if board.form_mill(idx):
+                            if board.form_mill(remove_piece):
                                 removepos = False
+                                board.check_remove_active_mill()
                                 break
                             break
                         print(f"Player Turn is: {2 if board.get_player_turn() == 2 else 1}")
@@ -740,7 +752,8 @@ def game_loop(variable_load, computer):
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            #print("removepos: ", removepos)
+            print("removepos: ", removepos)
+            print("gameover: ", gameover)
             #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
@@ -749,13 +762,13 @@ def game_loop(variable_load, computer):
             #print("Loop check: ", loop_check)
             print("computer move from: ", selections[0])
             print("computer move to: ", selections[1])
-            print("board positions: ", board.get_positions())
+            #print("board positions: ", board.get_positions())
             #     # Add more event handling logic here for other phases
             # print("remaining turns: ", board.get_remaining_turns())
             # Drawing the game state
             #print("Calling draw_board()...")
 
-            print("Computer: ", computer)
+            #print("Computer: ", computer)
 
             if variable_load == 'True':
                 board.load()
