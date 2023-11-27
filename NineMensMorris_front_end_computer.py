@@ -445,6 +445,7 @@ def game_loop(variable_load, computer):
     game_mode_selection = False
     plr_turn = 1
     loop_check = False
+    selections = [0,0]
     while running:
         try:
             # Event handling
@@ -667,9 +668,9 @@ def game_loop(variable_load, computer):
                         play_loop = round( time.time() - counter )
 
                 # if player == 2's turn, then call the computer's turn
-                if(board.get_player_turn() == 2 and board.get_remaining_turns() == 0):
-                    plr_turn = board.get_player_turn()
-                print("Player turn: ", plr_turn)
+                # if(board.get_player_turn() == 2 and board.get_remaining_turns() == 0):
+                #     plr_turn = board.get_player_turn()
+                # print("Player turn: ", plr_turn)
                 if board.get_player_turn() == 2 and computer == 1:
                     if board.get_remaining_turns() != 0:
                         board.computer_place_piece()
@@ -689,11 +690,10 @@ def game_loop(variable_load, computer):
                                 removepos = False
                                 break
                             break
-                        #print(f"Player Turn is: {2 if board.get_player_turn() == 2 else 1}")
                     if board.get_remaining_turns() == 0:
                         if board.player_piece_count() != 3:
                             loop_check = True
-                            board.computer_move_piece()
+                            selections = board.computer_move_piece()
                         if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             board.computer_fly_piece() # gotta write the method for this
 
@@ -745,8 +745,11 @@ def game_loop(variable_load, computer):
             # print("replay: ", replay)
             # print("play: ", play)
             # print("board positions: ", board.get_positions())
-            print("board player turn (after computer turn): ", board.get_player_turn())
-            print("Loop check: ", loop_check)
+            #print("board player turn (after computer turn): ", board.get_player_turn())
+            #print("Loop check: ", loop_check)
+            print("computer move from: ", selections[0])
+            print("computer move to: ", selections[1])
+            print("board positions: ", board.get_positions())
             #     # Add more event handling logic here for other phases
             # print("remaining turns: ", board.get_remaining_turns())
             # Drawing the game state

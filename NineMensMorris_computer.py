@@ -2,12 +2,11 @@ import atexit
 import copy
 import os
 import pickle
+import random
 import signal
 import sys
 import time
 
-
-import random
 
 class Board:
     def __init__(self):
@@ -374,9 +373,9 @@ class Game_Functions(Board):
         #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         return True
     
-    def computer_move_to(self): #picks a spot to move to
-        permissible_moves = self.get_permissible_moves()
-        empty_positions = [pos for pos, moves in permissible_moves.items() if not self.is_occupied(pos)]
+    def computer_move_to(self,move_from): #picks a spot to move to
+        permissible_moves = self.get_permissible_moves()[move_from]
+        empty_positions = [pos for pos in permissible_moves if self.is_occupied(pos) == False]
         return random.choice(empty_positions)
 
     def computer_move_from(self): #picks a spot to move from
@@ -412,8 +411,10 @@ class Game_Functions(Board):
 
     def computer_move_piece(self):
         current_position = self.computer_move_from()
-        move_to = self.computer_move_to()
+        move_to = self.computer_move_to(current_position)
+        selections = [current_position, move_to]
         self.move_piece(current_position, move_to)
+        return selections
         print(f"Computer moved a piece from {current_position} to {move_to}")
 
 
