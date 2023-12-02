@@ -378,36 +378,153 @@ class Game_Functions(Board):
         #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         return True
     
-    def computer_move_to(self,move_from): #picks a spot to move to
+    def computer_move_to(self, move_from):
         permissible_moves = self.get_permissible_moves()[move_from]
-        empty_positions = [pos for pos in permissible_moves if self.is_occupied(pos) == False]
-        return random.choice(empty_positions)
+        positions = self.get_positions()
+        mill_combinations = self.mill_list()
 
-    def computer_move_from(self): #picks a spot to move from
-        player2_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 2]
-        choice = True
-        while choice == True:
-            ranchoice = random.choice(player2_positions)
-            # select a permissible move list in the persmissible_moves dictionary with the key of ranchoice
-            permissible_move = self.get_permissible_moves()[ranchoice]
+        for move in permissible_moves:
+            if not self.is_occupied(move):
+                # Check for blocking human mills
+                if self.blocks_opponent_mill(move_from, move, positions, mill_combinations):
+                    return move
+                # Check for forming computer mills
+                if self.forms_own_mill(move_from, move, positions, mill_combinations):
+                    return move
+                # Check for creating two-in-a-row
+                if self.creates_two_in_a_row(move_from, move, positions, mill_combinations):
+                    return move
 
-            for position in permissible_move:
-                if self.is_occupied(position) == False:
-                    choice = False
+        return random.choice(permissible_moves) if permissible_moves else None
 
-        return ranchoice
+    def computer_move_from(self):
+        positions = self.get_positions()
+        computer_positions = [pos for pos, player in enumerate(positions) if player == 2]
+        mill_combinations = self.mill_list()
+
+        for current_position in computer_positions:
+            for move in self.get_permissible_moves()[current_position]:
+                if not self.is_occupied(move):
+                    # Check for blocking human mills
+                    if self.blocks_opponent_mill(current_position, move, positions, mill_combinations):
+                        return current_position
+                    # Check for forming computer mills
+                    if self.forms_own_mill(current_position, move, positions, mill_combinations):
+                        return current_position
+                    # Check for creating two-in-a-row
+                    if self.creates_two_in_a_row(current_position, move, positions, mill_combinations):
+                        return current_position
+
+        return random.choice(computer_positions) if computer_positions else None
     
-    def computer_fly_to(self): #picks a spot to move to
-        # pick a random position that is not occupied
-        empty_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 0]
-        return random.choice(empty_positions)
+    def blocks_opponent_mill(self, current_position, new_position, positions, mill_combinations):
+        positions[current_position] = 0
+        positions[new_position] = 2
+        for combo in mill_combinations:
+            if all(positions[pos] == 1 for pos in combo) and positions[new_position] == 0:
+                positions[current_position] = 2
+                positions[new_position] = 0
+                return True
+        positions[current_position] = 2
+        positions[new_position] = 0
+        return False
+
+    def forms_own_mill(self, current_position, new_position, positions, mill_combinations):
+        positions[current_position] = 0
+        positions[new_position] = 2
+        for combo in mill_combinations:
+            if all(positions[pos] == 2 for pos in combo):
+                positions[current_position] = 2
+                positions[new_position] = 0
+                return True
+        positions[current_position] = 2
+        positions[new_position] = 0
+        return False
+
+    def creates_two_in_a_row(self, current_position, new_position, positions, mill_combinations):
+        positions[current_position] = 0
+        positions[new_position] = 2
+        for combo in mill_combinations:
+            if sum(positions[pos] == 2 for pos in combo) == 2 and any(positions[pos] == 0 for pos in combo):
+                positions[current_position] = 2
+                positions[new_position] = 0
+                return True
+        positions[current_position] = 2
+        positions[new_position] = 0
+        return False
     
-    
+    def mill_list(self):
+            mill_combinations = []
+            if(self.get_board_size() == 3):
+                mill_combinations = [
+                [0, 1, 2], [0, 4, 8], [0, 3, 6],
+                [1, 4, 7], [2, 4, 6], [2, 5, 8],
+                [6, 7, 8]
+                ]
+                return mill_combinations
+            elif(self.get_board_size() == 6):
+                mill_combinations = [
+                [0, 1, 2], [0, 6, 13], [2, 9, 15],
+                [3, 4, 5], [3, 7, 10], [5, 8, 12],
+                [10, 11, 12], [13, 14, 15]
+                ]
+                return mill_combinations
+            elif(self.get_board_size() == 9):
+                mill_combinations = [
+                [0, 1, 2], [2, 4, 7], [5, 6, 7],
+                [0, 3, 5], [8, 9, 10], [10, 12, 15],
+                [13, 14, 15], [8, 11, 13],
+                [16, 17, 18], [18, 20, 23], [21, 22, 23],
+                [16, 19, 21], [1, 9, 17], [20, 12, 4],
+                [22, 14, 6], [3, 11, 19]
+                ]
+                return mill_combinations
+            
+    def computer_fly_to(self):
+        positions = self.get_positions()  # Get current board positions
+        mill_combinations = self.mill_list()  # Get mill combinations based on board size
+
+        # 1. Block human player's potential mill
+        for combo in mill_combinations:
+            if self.is_two_in_a_row_and_empty(combo, positions, player=1):
+                return self.find_empty_in_combo(combo, positions)
+
+        # 2. Form computer's own mill
+        for combo in mill_combinations:
+            if self.is_two_in_a_row_and_empty(combo, positions, player=2):
+                return self.find_empty_in_combo(combo, positions)
+
+        # 3. Move based on mill combinations
+        for combo in mill_combinations:
+            for position in combo:
+                if positions[position] == 2:  # If a computer piece is part of the combo
+                    for pos in combo:
+                        if positions[pos] == 0:  # If position in combo is empty
+                            return pos  # Move here
+
+        # If no move is found, return a random empty position (or handle differently as needed)
+        empty_positions = [pos for pos, player in enumerate(positions) if player == 0]
+        return random.choice(empty_positions) if empty_positions else None
+
+
+    def is_two_in_a_row_and_empty(self, combo, positions, player):
+        count = sum(positions[pos] == player for pos in combo)
+        empty_count = sum(positions[pos] == 0 for pos in combo)
+        return count == 2 and empty_count == 1
+
+    def find_empty_in_combo(self, combo, positions):
+        for pos in combo:
+            if positions[pos] == 0:
+                return pos
+                if positions[pos] == 0:
+                    return pos
+
     def computer_fly_piece(self):
         current_position = self.computer_move_from()
         move_to = self.computer_fly_to()
         self.fly_piece(current_position, move_to)
         print(f"Computer flew a piece from {current_position} to {move_to}")
+
 
     def computer_place_piece(self):
         position = self.computer_fly_to()
@@ -423,12 +540,11 @@ class Game_Functions(Board):
         selections = [current_position, move_to]
         self.move_piece(current_position, move_to)
         return selections
+
     def computer_remove_piece(self):
         player1_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 1]
         ranchoice = random.choice(player1_positions)
         return ranchoice
-
-
 
     def play_game(self):
         while not self.is_game_over() and not self.is_gridlocked():
@@ -526,23 +642,3 @@ class Game_Functions(Board):
         self.__temp_log = []  # clear the in-memory log
 
 
-
-'''
-def new_restart_game(self):
-    self.set_positions([0] * 24)
-    self.set_player_turn(1)
-    self.set_active_mills([])
-    self.set_remaining_turns(18)
-    if os.path.exists(self.TEMP_LOG_PATH):
-        os.remove(self.TEMP_LOG_PATH)
-    self.__temp_log = []  # clear the in-memory log
-
-    def cleanup(self):
-        if os.path.exists(self.TEMP_LOG_PATH):
-            print("\nGame exited, temporary log cleared.")
-            os.remove(self.TEMP_LOG_PATH)
-
-    def signal_handler(self, signal, frame):
-        self.cleanup()
-        sys.exit(0)
-'''

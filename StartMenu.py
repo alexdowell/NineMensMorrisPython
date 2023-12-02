@@ -2,7 +2,6 @@ import numbers
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
-from NineMensMorris_version7 import Game_Functions
 
 
 class GameInstructions:
@@ -43,7 +42,6 @@ class GameInstructions:
 
 class GameModes:
     def __init__(self):
-        self.game = Game_Functions()
         self.window = tk.Tk()
         self.window.title("Game Modes")
         self.window.geometry("800x600")
@@ -74,8 +72,7 @@ class GameModes:
         board_size_comm = self.board_size_field.get() + "0"
         if(isinstance(int(board_size_comm[0]), numbers.Number) and
            (int(board_size_comm[0]) == 3 or int(board_size_comm[0]) == 6 or int(board_size_comm[0]) == 9)):
-            self.game.set_board_size(int(board_size_comm[0]))
-            command = ['python', 'NineMensMorris_front_end_computer.py', board_size_comm]
+            command = ['python', 'GUI.py', board_size_comm]
             subprocess.Popen(command)
             print("Starting Human vs Human Game")
         else:
@@ -88,8 +85,7 @@ class GameModes:
         board_size_comm = self.board_size_field.get() + "1"
         if(isinstance(int(board_size_comm[0]), numbers.Number) and
            (int(board_size_comm[0]) == 3 or int(board_size_comm[0]) == 6 or int(board_size_comm[0]) == 9)):
-            self.game.set_board_size(int(board_size_comm[0]))
-            command = ['python', 'NineMensMorris_front_end_computer.py', board_size_comm]
+            command = ['python', 'GUI.py', board_size_comm]
             subprocess.Popen(command)
             print("Starting Human vs Computer Game")
         else:
@@ -112,15 +108,11 @@ class StartMenu(tk.Tk):
         self.geometry("800x600")
         self.configure(background="#87CEEB")
 
-        self.game = Game_Functions()
-
         title_font = ("Arial", 48, "bold")
         button_font = ("Arial", 18)
 
         self.title_label = tk.Label(self, text="Nine Men's Morris", font=title_font)
         self.title_label.pack(pady=20)
-
-        self.game_functions = Game_Functions() 
 
         self.new_game_button = tk.Button(self, text="New Game", font=button_font, command=self.show_new_game_options, width=15)
         self.new_game_button.pack(pady=10)
@@ -148,7 +140,7 @@ class StartMenu(tk.Tk):
         variable_load = open("load_game.txt", "w+")
         variable_load.write('True')
 
-        command = ['python', 'NineMensMorris_front_end_computer.py']
+        command = ['python', 'GUI.py']
         subprocess.Popen(command)
         print("Starting Human vs Human Game")
 

@@ -4,7 +4,8 @@ import sys
 import time
 
 import pygame
-from NineMensMorris_computer import Game_Functions as Game_Functions
+
+from Board import Game_Functions as Game_Functions
 
 DEBUG = False
 
@@ -694,11 +695,12 @@ def game_loop(variable_load, computer):
                             break
 
                         if removepos == True:
+                            print("yo we here at computer remove piece")
                             if board.form_mill(remove_piece):
                                 removepos = False
                                 board.check_remove_active_mill()
-                                break
-                            break
+                                print("we gotz problemz")
+                    print("we here now where's next")
                     if board.get_remaining_turns() == 0:
                         if board.player_piece_count() != 3:
                             loop_check = True
@@ -722,8 +724,7 @@ def game_loop(variable_load, computer):
                             if board.form_mill(remove_piece):
                                 removepos = False
                                 board.check_remove_active_mill()
-                                break
-                            break
+                                print("apples smell good")
                         print(f"Player Turn is: {2 if board.get_player_turn() == 2 else 1}")
                     board.save_current_state_to_log()
                 
