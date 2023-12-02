@@ -2,80 +2,56 @@ import os
 import pickle
 import sys
 import time
-
 import pygame
-from NineMensMorris_computer import Game_Functions as Game_Functions
+from NineMensMorris_Game import Game
 
 DEBUG = False
 
-# look if the load_game.txt file exists and if it doesn't exist, then create it and save variable_load == false in it
-if not os.path.exists("load_game.txt"):
-    variable_load = 'False'
-    
-    # save load == false in load_game.txt
-    variable_load = open("load_game.txt", "w+")
-    variable_load.write('False')
+# Check if the load_game.txt file exists and create it if it doesn't
+load_file_path = "load_game.txt"
+if not os.path.exists(load_file_path):
+    with open(load_file_path, "w+") as variable_load_file:
+        variable_load_file.write('False')
 
-# open("load_game.txt", "w+")
-# read data in load_game.txt if load_game.txt is empty, then create load == true
-# if load_game.txt is not empty, then create load == false
+# Read data from load_game.txt
+with open(load_file_path, "r") as variable_load_file:
+    variable_load = variable_load_file.read()
 
-# open load_game.txt and save the data in load variable
-variable_load = open("load_game.txt", "r")
-variable_load = variable_load.read()
-
-
-# set up new board
-# if variable_load == 'False':
+# Set up the new board
 board_size = 9
-# board_size = 0
-# extract board size from system (from previous screen)
-if(len(sys.argv) > 1):
-    board_computer_variable = sys.argv[1]
-    print("board_computer_variable: ", board_computer_variable)
-    print(type(board_computer_variable))
-    board_computer_variable = str(board_computer_variable)
-    # take the first digit of the board_computer_variable and set it to board_size
-    # take the second digit of the board_computer_variable and set it to computer
-    board_size = int(board_computer_variable[0])
-    computer = int(board_computer_variable[1])
-    # print("board_size: ", board_size)
-else:
-    computer = 0
-    # print("board_size: ", board_size)
-    # print("computer: ", computer)
+computer = 0
 
+# Extract board size from the system (from the previous screen)
+if len(sys.argv) > 1:
+    board_size_comm = sys.argv[1]
+    board_size = int(board_size_comm[0])
+    computer = int(board_size_comm[1])
 
 # Global Variables
-board = Game_Functions()
-# set up board
-# board.set_board_size(9)
+board = Game()
 
+# Set up the board
 board.set_board_size(board_size)
 board.set_initial_positions()
 board.set_player_turn(1)
 board.set_initial_remaining_turns()
 board.set_initial_permissible_moves()
+board.set_game_mode(computer)
 
-
-pygame.font.init()  # you have to call this at the start, 
-                    # if you want to use this module.
-myfont = pygame.font.SysFont('Arial', 18)
 # Initialize pygame
-print(" calling pygame.init()")
-pygame.init()
-print("pygame initialized")
-# Set the size of the screen
-screen = pygame.display.set_mode((600, 750))
+pygame.font.init()
+myfont = pygame.font.SysFont('Arial', 18)
 
+# Set up the screen
+screen = pygame.display.set_mode((600, 750))
 pygame.display.set_caption("Nine Men Morris")
-print("game window initialized")
-# nine mens morris board images (3 mens, 6 mens, 9 mens)
+
+# Load nine mens morris board images
 boardImg3 = pygame.image.load('3mens.png')
 boardImg6 = pygame.image.load('6mens.png')
 boardImg9 = pygame.image.load('dragon9mens.png')
 
-# avatar images
+# Load avatar images
 leafImg = pygame.image.load('player1_30x30.png')
 fireImg = pygame.image.load('player2_30x30.png')
 highImg = pygame.image.load('high.png')
@@ -85,42 +61,26 @@ pantherimg = pygame.transform.scale(pantherimg, (30, 30))
 dragonimg = pygame.image.load('dragon.png')
 dragonimg = pygame.transform.scale(dragonimg, (30, 30))
 
-# restart button
-restart_button = pygame.image.load('restart.png')
-# replay buttons
-play_button = pygame.image.load('play_button.png')
-pause_button = pygame.image.load('pause_button.png')
-rewind_button = pygame.image.load('rewind_button.png')
-fast_forward_button = pygame.image.load('fast_forward_button.png')
-back_button = pygame.image.load('back_button.png')
-replay_button = pygame.image.load('replay_button.png')
-save_button = pygame.image.load('save_button.png')
-load_button = pygame.image.load('load_button.png')
-# rduce size of of the replay button images
-play_button = pygame.transform.scale(play_button, (30, 30))
-pause_button = pygame.transform.scale(pause_button, (30, 30))
-rewind_button = pygame.transform.scale(rewind_button, (30, 30))
-fast_forward_button = pygame.transform.scale(fast_forward_button, (30, 30))
-back_button = pygame.transform.scale(back_button, (30, 30))
-replay_button = pygame.transform.scale(replay_button, (30, 30))
-save_button = pygame.transform.scale(save_button, (30, 30))
-load_button = pygame.transform.scale(load_button, (30, 30))
-restart_button = pygame.transform.scale(restart_button, (30, 30))
+# Load buttons and adjust sizes
+restart_button = pygame.transform.scale(pygame.image.load('restart.png'), (30, 30))
+play_button = pygame.transform.scale(pygame.image.load('play_button.png'), (30, 30))
+pause_button = pygame.transform.scale(pygame.image.load('pause_button.png'), (30, 30))
+rewind_button = pygame.transform.scale(pygame.image.load('rewind_button.png'), (30, 30))
+fast_forward_button = pygame.transform.scale(pygame.image.load('fast_forward_button.png'), (30, 30))
+back_button = pygame.transform.scale(pygame.image.load('back_button.png'), (30, 30))
+replay_button = pygame.transform.scale(pygame.image.load('replay_button.png'), (30, 30))
+save_button = pygame.transform.scale(pygame.image.load('save_button.png'), (30, 30))
+load_button = pygame.transform.scale(pygame.image.load('load_button.png'), (30, 30))
 
-# expand size of 3 mens and 6 mens boards
+# Expand the size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
 boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
 boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 
-# game mode selection buttons
-single_player = pygame.image.load('single_player.png')
-multi_player = pygame.image.load('multi_player.png')
-single_player = pygame.transform.scale(single_player, (30, 30))
-multi_player = pygame.transform.scale(multi_player, (30, 30))
+# Game mode selection buttons
+single_player = pygame.transform.scale(pygame.image.load('single_player.png'), (30, 30))
+multi_player = pygame.transform.scale(pygame.image.load('multi_player.png'), (30, 30))
 
-
-# coordinates of each board position in Board and corresponding position in the nine mens morris board image
-print("images loaded")
 coords = {}
 if(board.get_board_size() == 9):
     coords = {
@@ -224,6 +184,128 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
     try:
         # Draw the background board
         screen.blit(board_img.convert(), (0, 0))
+
+        # Draw borders around the clickable areas
+        if DEBUG and not (replay and play):
+            clickables_to_draw = replay_clickables if replay else clickables
+            for rect in clickables_to_draw:
+                pygame.draw.rect(screen, BLACK, rect, 1)
+
+        # Draw the pieces on the board
+        for pos, value in enumerate(positions):
+            x, y = coords[pos]
+            piece_img = pantherimg.convert_alpha() if value == 1 else dragonimg.convert_alpha()
+            screen.blit(piece_img, (x, y))
+
+        # Highlight selected piece with a green rectangle
+        if startpos is not None:
+            x, y = coords[startpos]
+            pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
+
+        # Draw the selection buttons for game mode
+        if game_mode_selection:
+            screen.blit(single_player.convert_alpha(), (selection_coords[1]))
+            screen.blit(multi_player.convert_alpha(), (selection_coords[2]))
+
+        # Draw replay and other buttons based on the game state
+        draw_buttons(screen, replay, play)
+    except Exception as e:
+        print(f"Error drawing the board: {e}")
+
+def draw_buttons(screen, replay, play):
+    replay_button_coord = None
+    save_button_coord = None
+    load_button_coord = None
+    restart_button_coord = None
+
+    if not (replay and play):
+        replay_button_coord, save_button_coord, load_button_coord, restart_button_coord = get_replay_restart_button_coords()
+
+        screen.blit(replay_button.convert_alpha(), replay_button_coord)
+        screen.blit(save_button.convert_alpha(), save_button_coord)
+        screen.blit(load_button.convert_alpha(), load_button_coord)
+        screen.blit(restart_button.convert_alpha(), restart_button_coord)
+
+    elif replay and not play:
+        rewind_button_coord, play_button_coord, fast_forward_button_coord, back_button_coord = replay_coords[1:]
+
+        screen.blit(rewind_button.convert_alpha(), rewind_button_coord)
+        screen.blit(play_button.convert_alpha(), play_button_coord)
+        screen.blit(fast_forward_button.convert_alpha(), fast_forward_button_coord)
+        screen.blit(back_button.convert_alpha(), back_button_coord)
+
+    elif replay and play:
+        play_button_coord, pause_button_coord, back_button_coord = play_coords[1:]
+
+        screen.blit(play_button.convert_alpha(), play_button_coord)
+        screen.blit(pause_button.convert_alpha(), pause_button_coord)
+        screen.blit(back_button.convert_alpha(), back_button_coord)
+
+def get_replay_restart_button_coords():
+    if board.get_board_size() == 3:
+        return coords[9], coords[10], coords[11], coords[12]
+    elif board.get_board_size() == 6:
+        return coords[16], coords[17], coords[18], coords[19]
+    elif board.get_board_size() == 9:
+        return coords[24], coords[25], coords[26], coords[27]
+
+def draw_game_info(screen, game_functions, gameover, gridlocked, removepos, replay, game_mode_selection):
+    texts = []
+
+    if gameover:
+        if replay:
+            texts = ["In Replay Mode"]
+        elif gridlocked:
+            texts = [
+                f"Player {2 if game_functions.get_player_turn() == 1 else 1} is gridlocked! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
+                "Close window to change game settings or click Restart"
+            ]
+        else:
+            texts = [
+                f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
+                "Close window to change game settings or click Restart"
+            ]
+    elif not gameover and not game_mode_selection:
+        if game_functions.get_remaining_turns() != 0:
+            if removepos:
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    "Select an opponent's piece to remove from the board."
+                ]
+            elif replay:
+                texts = ["In Replay Mode"]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    f"Remaining Turns: {game_functions.get_remaining_turns()}"
+                ]
+        elif game_functions.get_remaining_turns() == 0:
+            if removepos:
+                texts = [
+                    f"Player {1 if game_functions.get_player_turn() == 1 else 2} formed a mill!",
+                    "Select an opponent's piece to remove from the board."
+                ]
+            elif replay:
+                texts = ["In Replay Mode"]
+            else:
+                texts = [
+                    f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
+                    "It's time to move pieces! Select a piece to move then select the position you want to move to."
+                ]
+    elif game_mode_selection:
+        texts = ["Select Game Mode"]
+
+    for i, text in enumerate(texts):
+        textsurface = myfont.render(text, False, BLACK)
+        screen.blit(textsurface, (10, 600 + i * 30))
+
+
+'''
+# Functions to draw the game state
+def draw_board(screen, board_img, positions, coords, replay, play, game_mode_selection, startpos):
+    try:
+        # Draw the background board
+        screen.blit(board_img.convert(), (0, 0))
         # Draw boarders around the clickable areas
         if DEBUG:
             if replay == False and play == False:
@@ -248,15 +330,6 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
         if startpos != None:
             x, y = coords[startpos]
             pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
-        # draw the restart game button
-        restart_btn_coord = None
-        if(board.get_board_size() == 3):
-            restart_btn_coord = coords[12]
-        elif(board.get_board_size() == 6):
-            restart_btn_coord = coords[19]
-        elif(board.get_board_size() == 9):
-            restart_btn_coord = coords[27]
-        screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
 
         # draw the selection buttons
         if game_mode_selection == True:
@@ -270,21 +343,26 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
             replay_btn_coord = None
             save_btn_coord = None
             load_btn_coord = None
+            restart_btn_coord = None
             if(board.get_board_size() == 3):
                 replay_btn_coord = coords[9]
                 save_btn_coord = coords[10]
                 load_btn_coord = coords[11]
+                restart_btn_coord = coords[12]
             elif(board.get_board_size() == 6):
                 replay_btn_coord = coords[16]
                 save_btn_coord = coords[17]
                 load_btn_coord = coords[18]
+                restart_btn_coord = coords[19]
             elif(board.get_board_size() == 9):
                 replay_btn_coord = coords[24]
                 save_btn_coord = coords[25]
                 load_btn_coord = coords[26]
+                restart_btn_coord = coords[27]
             screen.blit(replay_button.convert_alpha(), (replay_btn_coord))
             screen.blit(save_button.convert_alpha(), (save_btn_coord))
             screen.blit(load_button.convert_alpha(), (load_btn_coord))
+            screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
         if replay == True and play == False:
             screen.blit(rewind_button.convert_alpha(), (replay_coords[1]))
             screen.blit(play_button.convert_alpha(), (replay_coords[2]))
@@ -299,20 +377,29 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
 
 
 
-def draw_game_info(screen, game_functions, gameover, removepos, replay, game_mode_selection):
+
+
+
+
+def draw_game_info(screen, game_functions, gameover, gridlocked, removepos, replay, game_mode_selection):
 
     # Display the variables from the Board class
-    if gameover == True:
+    if gameover:
         if(replay):
             texts = [
                 f"In Replay Mode"
+            ]
+        elif(gridlocked):
+            texts = [
+                f"Player {2 if game_functions.get_player_turn() == 1 else 1} is gridlocked! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
+                f"Close window to change game settings or click Restart"
             ]
         else:
             texts = [
                 f"Game Over! Player {2 if game_functions.get_player_turn() == 1 else 1} wins!",
                 f"Close window to change game settings or click Restart"
             ]
-    if gameover == False and game_mode_selection == False:
+    if not gameover and not game_mode_selection:
         if(game_functions.get_remaining_turns() != 0):
             if(removepos):
                 texts = [
@@ -344,7 +431,7 @@ def draw_game_info(screen, game_functions, gameover, removepos, replay, game_mod
                     f"It's Player {1 if game_functions.get_player_turn() == 1 else 2}'s turn!",
                     f"It's time to move pieces! Select a piece to move then select the position you want to move to."
                 ]
-    if game_mode_selection == True:
+    if game_mode_selection:
         texts = [
             f"Select Game Mode"
         ]
@@ -353,9 +440,10 @@ def draw_game_info(screen, game_functions, gameover, removepos, replay, game_mod
     for i, text in enumerate(texts):
         textsurface = myfont.render(text, False, (0, 0, 0))
         screen.blit(textsurface, (10, 600 + i*30))
+'''
 
 ###### replay with GUI ######
-def set_replay(idx):
+def set_replay():
     print("replay function called")
     if not os.path.exists(board.TEMP_LOG_PATH):
         print("No saved game states to replay.")
@@ -376,6 +464,7 @@ def set_replay(idx):
         'active_mills': board.get_active_mills(),
         'remaining_turns': board.get_remaining_turns(),
         'permissible_moves': board.get_permissible_moves(),
+        'game_mode': board.get_game_mode()
     }
     currentstuff = [log,current_state]
     return currentstuff
@@ -401,6 +490,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
         board.set_remaining_turns(state['remaining_turns'])
+        board.set_game_mode(state['game_mode'])
         return replay_state
 
     if replay_option == 2:
@@ -418,6 +508,7 @@ def replay_handler(replay_option,log,replay_state,current_state):
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
         board.set_remaining_turns(state['remaining_turns'])
+        board.set_game_mode(state['game_mode'])
         return replay_state
     
     if replay_option == 3: # exit replay button
@@ -428,8 +519,109 @@ def replay_handler(replay_option,log,replay_state,current_state):
         board.set_player_turn(current_state['player_turn'])
         board.set_active_mills(current_state['active_mills'])
         board.set_remaining_turns(current_state['remaining_turns'])
+        board.set_game_mode(state['game_mode'])
 
-def game_loop(variable_load, computer):
+
+def handle_mouse_up_events(event, replay, startpos, endpos, gameover, currentstuff, clickables, replay_clickables):
+    try:
+        if replay:
+            handle_replay_mouse_up(event, replay, currentstuff, replay_clickables)
+        else:
+            handle_main_game_mouse_up(event, startpos, endpos, gameover, currentstuff, clickables)
+    except Exception as e:
+        print(f"Error handling mouse up events: {e}")
+
+def handle_main_game_mouse_up(event, currentstuff, clickables):
+    try:
+        for i, rect in enumerate(clickables):
+            if rect.collidepoint(event.pos):
+                handle_main_game_click(i, currentstuff)
+                break
+    except Exception as e:
+        print(f"Error handling main game mouse up event: {e}")
+def handle_replay_mouse_up(event, currentstuff, replay_clickables):
+    try:
+        for i, rect in enumerate(replay_clickables):
+            if rect.collidepoint(event.pos):
+                handle_replay_click(i, currentstuff)
+                break
+    except Exception as e:
+        print(f"Error handling replay mouse up event: {e}")
+
+def handle_main_game_click(index, replay, currentstuff):
+    payload = None
+    try:
+        # Handle main game clicks based on the index
+        # DEBUG print(f"Main game click: {index}")
+        # Add logic here
+        if board_size == 9:
+            if index == 24:
+                currentstuff = set_replay(index)
+                replay = True
+                payload = currentstuff
+            elif(index == 25):
+                board.save()
+            elif(index == 26):
+                board.load()
+            elif(index == 27):
+                board.new_restart_game()
+                gameover = False
+    except Exception as e:
+        print(f"Error handling main game click: {e}")
+
+def handle_replay_click(index, replay, currentstuff):
+    try:
+        # Handle replay clicks based on the index and current state
+        # DEBUG print(f"Replay click: {index}")
+        replay_handler(index, currentstuff[0], currentstuff[1], currentstuff[2])
+    except Exception as e:
+        print(f"Error handling replay click: {e}")
+
+
+def game_loop(variable_load):
+    # DEBUG print("Initializing game window")
+    screen.fill(WHITE)
+    clock = pygame.time.Clock()
+    running = True
+    startpos, endpos, removepos, gameover, gridlocked, replay = None, None, False, False, False, False
+    replay_state, play, pause, sleep, boardImg = 0, False, False, False, None
+    game_mode_selection = False
+
+    while running:
+        try:
+            # Event handling
+            if not game_mode_selection:
+                if not play:
+                    for event in pygame.event.get():
+                        # DEBUG print(f"Event: {event}")
+                        if event.type == pygame.QUIT:
+                            # DEBUG print("Quit event detected. Closing game window...")
+                            running = False
+                            break
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            handle_mouse_up_events(event, replay, startpos, endpos, gameover, currentstuff, clickables, replay_clickables)
+                if play:
+                        handle_play_events(event, play_clickables, currentstuff, play_loop, play_length, play_length, counter)
+                
+            if game_mode_selection:
+                handle_game_mode_selection(pygame.event.get(), selection_clickables, board, game_mode_selection)
+            
+            handle_computer_turn(board, startpos, endpos, removepos, gameover)
+            
+            screen.fill(WHITE)
+            boardImg = choose_board_image(board, boardImg9, boardImg6, boardImg3)
+            draw_board(screen, boardImg, board.get_positions(), coords, replay, play, game_mode_selection, startpos)
+            if sleep:
+                time.sleep(1)
+                sleep = False
+            draw_game_info(screen, board, gameover, gridlocked, removepos, replay, game_mode_selection)
+            pygame.display.flip()
+            clock.tick(60)
+        except Exception as e:
+            print(f"Error in game loop: {e}")
+            running = False
+'''
+def game_loop(variable_load):
 
     print("Initializing game window...")
     screen.fill(WHITE)
@@ -442,6 +634,7 @@ def game_loop(variable_load, computer):
     endpos = None
     removepos = False
     gameover = False
+    gridlocked = False
     replay = False
     replay_state = 0
     play = False
@@ -449,9 +642,6 @@ def game_loop(variable_load, computer):
     sleep = False
     boardImg = None
     game_mode_selection = False
-    plr_turn = 1
-    loop_check = False
-    selections = [0,0]
     while running:
         try:
             # Event handling
@@ -553,8 +743,9 @@ def game_loop(variable_load, computer):
                                                 board.check_remove_active_mill()
                                                 removepos = False
                                                 board.save_current_state_to_log()
-                                                if board.is_game_over() and board.get_remaining_turns() == 0 and (board.get_board_size() == 6 or board.get_board_size() == 9):
+                                                if (board.is_game_over() or board.is_gridlocked()) and (board.get_board_size() == 6 or board.get_board_size() == 9) and board.get_remaining_turns() == 0:
                                                     gameover = True
+                                                    gridlocked = True
                                                 break
                                             break
                                         if board.get_remaining_turns() != 0:
@@ -577,10 +768,11 @@ def game_loop(variable_load, computer):
                                                 #print("Board size: ", board.get_board_size())
                                                 break
                                         if board.get_remaining_turns() == 0:
-                                                if board.is_game_over():
+                                                if board.is_game_over() or board.is_gridlocked():
                                                     #print("Game over!")
                                                     #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                                                     gameover = True
+                                                    gridlocked = True
                                                     break
                                                 if startpos == None:
                                                     startpos = idx
@@ -630,7 +822,6 @@ def game_loop(variable_load, computer):
                                                         else:
                                                             startpos = None
                                                             endpos = None
-                                break
                 if play == True:
                     for event in pygame.event.get():
                         print(f"Event: {event}")  # This will print out each event captured
@@ -674,12 +865,8 @@ def game_loop(variable_load, computer):
                         play_loop = pause_play_loop
                     if pause == False:
                         play_loop = round( time.time() - counter )
-
-                # if player == 2's turn, then call the computer's turn
-                # if(board.get_player_turn() == 2 and board.get_remaining_turns() == 0):
-                #     plr_turn = board.get_player_turn()
-                # print("Player turn: ", plr_turn)
-                if board.get_player_turn() == 2 and computer == 1:
+            
+                if board.get_player_turn() == 2 and board.get_game_mode() == 1:
                     if board.get_remaining_turns() != 0:
                         board.computer_place_piece()
 
@@ -701,20 +888,17 @@ def game_loop(variable_load, computer):
                             break
                     if board.get_remaining_turns() == 0:
                         if board.player_piece_count() != 3:
-                            loop_check = True
-                            selections = board.computer_move_piece()
+                            board.computer_move_piece()
                         if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             board.computer_fly_piece() # gotta write the method for this
 
                         if board.form_mill_GUI() and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             removepos = True
                             remove_piece = board.computer_remove_piece()
-                            print("remove piece on: ", removepos)
-                            print("and the remove piece is: ", remove_piece)
+                            #print("remove piece on: ", removepos)
+                            #print("and the remove piece is: ", remove_piece)
 
                         if board.form_mill_GUI() and board.get_board_size() == 3:
-                            print("Game over!")
-                            print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                             gameover = True
                             break
 
@@ -724,7 +908,7 @@ def game_loop(variable_load, computer):
                                 board.check_remove_active_mill()
                                 break
                             break
-                        print(f"Player Turn is: {2 if board.get_player_turn() == 2 else 1}")
+                        #print(f"Player Turn is: {2 if board.get_player_turn() == 2 else 1}")
                     board.save_current_state_to_log()
                 
 
@@ -741,27 +925,27 @@ def game_loop(variable_load, computer):
                         for idx, rect in enumerate(selection_clickables):
                             if rect.collidepoint(event.pos):
                                 if idx == 0:    
-                                    computer = 1
+                                    board.set_game_mode(1)
                                     game_mode_selection = False
                                     break
                                 if idx == 1:
-                                    computer = 0
+                                    board.set_game_mode(0)
                                     game_mode_selection = False
                                     break
 
 
             #print("startpos: ", startpos)
             #print("endpos: ", endpos)
-            print("removepos: ", removepos)
-            print("gameover: ", gameover)
+            #print("removepos: ", removepos)
+            #print("gameover: ", gameover)
             #print("Print test: ", test)
             # print("replay: ", replay)
             # print("play: ", play)
             # print("board positions: ", board.get_positions())
             #print("board player turn (after computer turn): ", board.get_player_turn())
             #print("Loop check: ", loop_check)
-            print("computer move from: ", selections[0])
-            print("computer move to: ", selections[1])
+            #print("computer move from: ", selections[0])
+            #print("computer move to: ", selections[1])
             #print("board positions: ", board.get_positions())
             #     # Add more event handling logic here for other phases
             # print("remaining turns: ", board.get_remaining_turns())
@@ -804,7 +988,7 @@ def game_loop(variable_load, computer):
                 sleep = False
             
             #print("Calling draw_game_info()...")
-            draw_game_info(screen, board, gameover, removepos, replay, game_mode_selection)
+            draw_game_info(screen, board, gameover, gridlocked, removepos, replay, game_mode_selection)
 
             # Updating the display
             #print("Updating display...")
@@ -823,4 +1007,9 @@ def game_loop(variable_load, computer):
     sys.exit()
 
 
-game_loop(variable_load, computer)
+
+'''
+
+
+
+game_loop(variable_load)

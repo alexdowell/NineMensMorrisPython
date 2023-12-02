@@ -1,199 +1,36 @@
-import atexit
 import copy
 import os
 import pickle
 import random
-import signal
-import sys
-import time
+from NineMensMorris_Board import Board
 
-
-class Board:
-    def __init__(self):
-        self.__board_size = None
-        self.__positions = []
-        self.__player_turn = 1
-        self.__active_mills = []
-        self.__remaining_turns = 0
-        self.__permissible_moves = {}
-    # Setter for board size
-    def set_board_size(self, board_size):
-        self.__board_size = board_size
-            
-    # Getter for board size
-    def get_board_size(self):
-        return self.__board_size
-
-    # Getter for positions
-    def get_positions(self):
-        return self.__positions
-
-    # Setter for initial positions
-    def set_initial_positions(self):
-        if(self.get_board_size() == 3):
-            self.__positions = [0] * 9
-        elif(self.get_board_size() == 6):
-            self.__positions = [0] * 16
-        elif(self.get_board_size() == 9):
-            self.__positions = [0] * 24
-    
-    # Setter for positions (when loading or saving a game)
-    def set_positions(self, positions):
-        self.__positions = positions
-
-    # Getter for player_turn
-    def get_player_turn(self):
-        return self.__player_turn
-
-    # Setter for player_turn
-    def set_player_turn(self, player_turn):
-        self.__player_turn = player_turn
-
-    # Getter for active_mills
-    def get_active_mills(self):
-        return self.__active_mills
-
-    # Setter for active_mills
-    def set_active_mills(self, active_mills):
-        self.__active_mills = active_mills
-
-    # Getter for remaining_turns
-    def get_remaining_turns(self):
-        return self.__remaining_turns
-    
-    # Setter for initial remaining turns
-    def set_initial_remaining_turns(self):
-        if(self.get_board_size() == 3):
-            self.__remaining_turns = 6
-        elif(self.get_board_size() == 6):
-            self.__remaining_turns = 12
-        elif(self.get_board_size() == 9):
-            self.__remaining_turns = 18
-    
-    # Setter for remaining turns (when loading or saving a game)
-    def set_remaining_turns(self, remaining_turns):
-        self.__remaining_turns = remaining_turns
-
-    # Getter for permissible_moves
-    def get_permissible_moves(self):
-        return self.__permissible_moves
-    
-    # Setter for initial permissible moves
-    def set_initial_permissible_moves(self):
-        if(self.get_board_size() == 3):
-            self.__permissible_moves = {
-                0: [1, 3, 4],
-                1: [0, 2, 4],
-                2: [1, 4, 5],
-                3: [0, 4, 6],
-                4: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-                5: [2, 4, 8],
-                6: [3, 4, 7],
-                7: [4, 6, 8],
-                8: [4, 5, 7]
-            }
-        elif(self.get_board_size() == 6):
-            self.__permissible_moves = {
-                0: [1, 6],
-                1: [0, 2, 4],
-                2: [1, 9],
-                3: [4, 7],
-                4: [1, 3, 5],
-                5: [4, 8],
-                6: [0, 7, 13],
-                7: [3, 6, 10],
-                8: [5, 9, 12],
-                9: [2, 8, 15],
-                10: [7, 11],
-                11: [10, 12, 14],
-                12: [8, 11],
-                13: [6, 14],
-                14: [11, 13, 15],
-                15: [9, 14]
-            }
-        elif(self.get_board_size() == 9):
-            self.__permissible_moves = {
-                0: [1, 3],
-                1: [0, 2, 9],
-                2: [1, 4],
-                3: [0, 11, 5],
-                4: [2, 12, 7],
-                5: [3, 6],
-                6: [5, 7, 14],
-                7: [4, 6],
-                8: [9, 11],
-                9: [1, 8, 17, 10],
-                10: [9, 12],
-                11: [8, 3, 19, 13],
-                12: [20, 10, 4, 15],
-                13: [11, 14],
-                14: [13, 22, 6, 15],
-                15: [14, 12],
-                16: [19, 17],
-                17: [16, 18, 9],
-                18: [17, 20],
-                19: [16, 11, 21],
-                20: [18, 12, 23],
-                21: [19, 22],
-                22: [14, 21, 23],
-                23: [20, 22]
-            }
-    # Setter for permissible moves (when loading or saving a game)
-    def set_permissible_moves(self, permissible_moves):
-        self.__permissible_moves = permissible_moves
-
-
-class ComputerPlayer:
-    board = Board()
-    def __init__(self, board):
-        self.board = board
-
-    
-
-class Game_Functions(Board):
+class Game(Board):
     TEMP_LOG_PATH = "temp_log.pkl"
     SAVED_LOG_PATH = "board_log.pkl"
     def __init__(self):
+        # calling super class's constructor
         super().__init__()
         # Add this new member for the in-memory log
         self.__temp_log = []
-        # self.computer_player = ComputerPlayer(self)
-
-
-        # Handle exit events
-        #atexit.register(self.cleanup)
-        #signal.signal(signal.SIGINT, self.signal_handler)
         
         # check if log exists or create an empty one
         if not os.path.exists("board_log.pkl"):
             with open("board_log.pkl", "wb") as file:
                 pickle.dump([], file)
 
-    def set_game_mode(self, mode):
-    # mode is a string that can be either 'human' or 'computer'
-        self.__game_mode = mode
-
-    def play_turn(self):
-        # Check if it's the computer's turn and the game mode is 'computer'
-        if self.get_player_turn() == 2 or self.__game_mode == 'computer':
-            # self.computer_move_piece()
-
-            position = self.computer_player.make_move()
-            self.computer_place_piece(position)
-        # Otherwise, it's the human player's turn, and they would make their move through the GUI
-
-
-
+    # checks if a position is occupied on the board and returns a boolean
     def is_occupied(self, position):
         return self.get_positions()[position] != 0
-
+    
+    # checks if the position is occupied by the CURRENT PLAYER (This will be used in move_piece and fly_piece methods)
     def is_current_player(self, position):
         return self.get_positions()[position] == self.get_player_turn()
 
+    # counts how many of each player's pieces is on the board
     def count_current_player_positions(self):
         return self.get_positions().count(self.get_player_turn())
 
-
+    # helps the player place a piece on the board. Depending on the board size, the upper limit (or the last position to place piece) changes
     def place_piece(self, position):
         upper_limit = 0
         if(self.get_board_size() == 9):
@@ -202,15 +39,16 @@ class Game_Functions(Board):
             upper_limit = 15
         elif(self.get_board_size() == 3):
             upper_limit = 8
-    
+        # the position needs to be within the limits of the board
         if 0 <= position <= upper_limit:
+            # the posiiton where the player is going to place a piece needs to be unoccupied
             if not self.is_occupied(position):
                 self.get_positions()[position] = self.get_player_turn()
                 self.set_remaining_turns(self.get_remaining_turns() - 1)
             return True
         else:
             return False
-
+    # helps the player move a piece on the board. Depending on the board size, the upper limit (or the last position to move a piece changes)
     def move_piece(self, current_position, move_to):
         upper_limit = None
         if(self.get_board_size() == 9):
@@ -222,7 +60,11 @@ class Game_Functions(Board):
     
         print("Upper limit: ", upper_limit)
         if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
-            if self.is_occupied(current_position) and self.is_current_player(current_position) and move_to in self.get_permissible_moves()[current_position] and not self.is_occupied(move_to):
+            # 1) the current position (the piece the player will move) needs to be occupied
+            # 2) the piece needs to be the player's piece
+            # 3) the position that they move to needs to be a move that is permissible (can't be invalid)
+            # 4) the position that they move the piece needs to be unoccupied
+            if self.is_occupied(current_position) and self.is_current_player(current_position) and self.is_permissible(current_position, move_to) and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
                 print("piece moved")
@@ -230,10 +72,10 @@ class Game_Functions(Board):
         else:
             print("piece not moved")
             return False
-
+    # checks if the move piece/fly piece action is valid (where the position where the player moved the piece is a permissible move)
     def is_permissible(self, current_position, move_to):
         return move_to in self.get_permissible_moves()[current_position]
-
+    # helps player remove a piece from the board (This method is only used when the board size is 9 or 6)
     def remove_piece(self, position):
         upper_limit = 0
         if(self.get_board_size() == 9):
@@ -242,13 +84,14 @@ class Game_Functions(Board):
             upper_limit = 15
         
         if 0 <= position <= upper_limit:
+            # the piece that the player removes cannot be their own piece and the position they remove it from has to be occupied
             if self.is_occupied(position) and not self.is_current_player(position):
                 self.get_positions()[position] = 0
                 print("piece removed")
                 return True
         else:
             return False
-
+    # helps the player fly a piece on the board (This method is only used when the board size is 9 or 6)
     def fly_piece(self, current_position, move_to):
         upper_limit = 0
         if(self.get_board_size() == 9):
@@ -257,13 +100,23 @@ class Game_Functions(Board):
             upper_limit = 15
         
         if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
+            # 1) the current position they fly from needs to be occupied and has to be their piece
+            # 2) the position they fly to can't be occupied
             if self.is_occupied(current_position) and self.is_current_player(current_position) and not self.is_occupied(move_to):
                 self.get_positions()[move_to] = self.get_player_turn()
                 self.get_positions()[current_position] = 0
                 return True
         else:
             return False
-    
+    # method that checks if a mill was formed after placing, moving, or flying a piece
+    # depending on the board the mill_combinations will change
+    '''
+    Note:
+    There are two methods called "form_mill" in the backend. 
+    One is used to make actual changes in the backend 
+    and the other is just a check to see if the mill is formed on the frontend.
+
+    '''
     def form_mill(self, position):
         mill_combinations = []
         if(self.get_board_size() == 3):
@@ -287,18 +140,23 @@ class Game_Functions(Board):
             [16, 19, 21], [1, 9, 17], [20, 12, 4],
             [22, 14, 6], [3, 11, 19]
             ]
-        
+        # keep track of newly formed mills
         newly_formed_mills = []
         for combo in mill_combinations:
+            # check if pieces form a mill based on the mill combinations 
             if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
+                # if the mill formed hasn't been set as an active mill, add it to the newly formed mills list
                 if combo not in self.get_active_mills():
                     newly_formed_mills.append(combo)
+        # if a new mill is formed by the current player, the current player can then remove a piece and then that newly formed mill is added to the active mills
+        # Note: Players can remove pieces only in 6 men's morris or 9 men's morris
         if newly_formed_mills and (self.get_board_size() == 6 or self.get_board_size() == 9):
-            print("positions before removing piece:", self.get_positions())
+            # DEBUG print("positions before removing piece:", self.get_positions())
             if self.remove_piece(position):
-                print("positions after removing piece:", self.get_positions())
+                # DEBUG print("positions after removing piece:", self.get_positions())
                 self.set_active_mills(self.get_active_mills() + newly_formed_mills)
                 return True
+        # if a new mill is formed and the game is 3 men's morris, it adds the newly formed mill to the active mills
         elif newly_formed_mills and self.get_board_size() == 3:
             self.set_active_mills(self.get_active_mills() + newly_formed_mills)
 
@@ -325,49 +183,52 @@ class Game_Functions(Board):
             [16, 19, 21], [1, 9, 17], [20, 12, 4],
             [22, 14, 6], [3, 11, 19]
             ]
-        #print("Board size: ", self.get_board_size())
+        # DEBUG print("Board size: ", self.get_board_size())
+
+        # keep track of newly formed mills
         newly_formed_mills = []
-        #print("backend positions:", self.get_positions())
-        #print("backend player turn:", self.get_player_turn())
+        # DEBUG print("backend positions:", self.get_positions())
+        # DEBUG print("backend player turn:", self.get_player_turn())
         for combo in mill_combinations:
-            #print(" ==== Comparison ====")
-            print(self.get_positions()[combo[0]], "," ,self.get_positions()[combo[1]], "," , self.get_positions()[combo[2]])
+            # DEBUG print(" ==== Comparison ====")
+            # DEBUG print(self.get_positions()[combo[0]], "," ,self.get_positions()[combo[1]], "," , self.get_positions()[combo[2]])
+            # check if pieces form a mill based on the mill combinations 
             if self.get_positions()[combo[0]] == self.get_positions()[combo[1]] == self.get_positions()[combo[2]] == self.get_player_turn():
-                #print("combo:", combo)
+                # DEBUG print("combo:", combo)
+                # if the mill formed hasn't been set as an active mill, add it to the newly formed mills list
                 if combo not in self.get_active_mills():
-                    #print("newly formed mill:", combo)
+                    # DEBUG print("newly formed mill:", combo)
                     newly_formed_mills.append(combo)
                     return True 
         return False
-
-    # def opposite_player_turn(self):
-    #     if self.get_player_turn() == 1:
-    #         return 2
-    #     else:
-    #         return 1
-
+    # method that lets the computer place a piece after the human player makes a turn
     def opposite_player_turn(self):
         if not self.get_player_turn() == 1:
             self.computer_place_piece()
 
+    # method that checks if a player moved or flown a piece that in a mill
     def check_remove_active_mill(self):
         mills_to_remove = []
 
         for mill in self.get_active_mills():
             player_at_mill = self.get_positions()[mill[0]]
+            # when a player moves a piece from a mill, add it to the mills that need to be removed from active mills
             if not (self.get_positions()[mill[0]] == self.get_positions()[mill[1]] == self.get_positions()[mill[2]] == player_at_mill):
                 mills_to_remove.append(mill)
 
         for mill in mills_to_remove:
+            # remove the active mill that the player broke
             self.get_active_mills().remove(mill)
 
+    # check if the game is over (This method is only called in 6 men's or 9 men's morris)
+    # if a player has only 2 pieces left or can't move anywhere else, the game is over
     def is_game_over(self):
         current_player_pieces = self.get_positions().count(self.get_player_turn())
         return current_player_pieces <= 2
-
+    # method that returns the amount of the current player's pieces on the board
     def player_piece_count(self):
         return self.get_positions().count(self.get_player_turn())
-
+    # method that returns if the player is gridlocked (where player cannot move anywhere)
     def is_gridlocked(self):
         opponent = 2 if self.get_player_turn() == 1 else 1
         for position, player in enumerate(self.get_positions()):
@@ -375,15 +236,16 @@ class Game_Functions(Board):
                 permissible = self.get_permissible_moves()[position]
                 if any([self.get_positions()[move] == 0 for move in permissible]):
                     return False
-        #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
+        # DEBUG print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         return True
-    
+    # method to select a position to move for the computer player (it always picks a random position)
     def computer_move_to(self,move_from): #picks a spot to move to
         permissible_moves = self.get_permissible_moves()[move_from]
         empty_positions = [pos for pos in permissible_moves if self.is_occupied(pos) == False]
         return random.choice(empty_positions)
 
-    def computer_move_from(self): #picks a spot to move from
+    # method to select a piece to move/piece to fly for the computer player (it always picks a random piece)
+    def computer_select_piece(self): #picks a spot to move from
         player2_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 2]
         choice = True
         while choice == True:
@@ -396,61 +258,44 @@ class Game_Functions(Board):
                     choice = False
 
         return ranchoice
-    
+    # method to select a position to fly to for the computer player (it always picks a random position)
     def computer_fly_to(self): #picks a spot to move to
         # pick a random position that is not occupied
         empty_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 0]
         return random.choice(empty_positions)
     
-    
+    # method to fly the piece for the computer player
     def computer_fly_piece(self):
-        current_position = self.computer_move_from()
+        current_position = self.computer_select_piece()
         move_to = self.computer_fly_to()
         self.fly_piece(current_position, move_to)
-        print(f"Computer flew a piece from {current_position} to {move_to}")
+        # DEBUG print(f"Computer flew a piece from {current_position} to {move_to}")
 
+    # method to place a piece for the computer player
     def computer_place_piece(self):
         position = self.computer_fly_to()
         self.place_piece(position)
         print("Computer placed a piece at position", position)
-
+    # method to move a piece for the computer player
     def computer_move_piece(self):
-        current_position = self.computer_move_from()
+        current_position = self.computer_select_piece()
         move_to = self.computer_move_to(current_position)
         print("move from: ", current_position)
         print("move to: ", move_to)
         print("positions: ", self.get_positions())
-        selections = [current_position, move_to]
         self.move_piece(current_position, move_to)
-        return selections
+    # method to remove a piece for the computer player (always removes a random piece from the opposing player)
     def computer_remove_piece(self):
         player1_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 1]
         ranchoice = random.choice(player1_positions)
         return ranchoice
-
-
-
-    def play_game(self):
-        while not self.is_game_over() and not self.is_gridlocked():
-            # self.print_board()
-
-            if self.get_player_turn() == 1:
-                self.player_turn_actions()
-            else:
-                self.computer_turn_actions()
-
-            self.check_remove_active_mill()
-            self.save_current_state_to_log()
-
-        # self.print_board()
-        # self.print_winner()
-
+    # method to control the place piece and move/fly pieces for computer player
     def computer_turn_actions(self):
         if self.get_remaining_turns() > 0:
             self.computer_place_piece()
         else:
             self.computer_move_piece()
-
+    # Saves the current state of the game to the temp log
     def save_current_state_to_log(self):
         state = {
             'board_size': self.get_board_size(),
@@ -460,21 +305,21 @@ class Game_Functions(Board):
             'remaining_turns': self.get_remaining_turns(),
             'permissible_moves': self.get_permissible_moves(),
         }
-        #print("State before appending to temp_log:", state)  # Debug statement
+        # DEBUG print("State before appending to temp_log:", state)  # Debug statement
         self.__temp_log.append(state)
-        #print("all states in temp_log:", self.__temp_log)  # Debug statement
+        # DEBUG print("all states in temp_log:", self.__temp_log)  # Debug statement
         self.persist_log('temp')  # Persist to temporary log
         self.set_player_turn(2 if self.get_player_turn() == 1 else 1)
 
 
-
+    # Keeps the temp log active in case it disappears during the game
     def persist_log(self, log_type):
         filepath = self.TEMP_LOG_PATH if log_type == 'temp' else self.SAVED_LOG_PATH
         with open(filepath, "wb") as file:
             pickle.dump(self.__temp_log, file)
         print(f"Saved {len(self.__temp_log)} logs to {filepath}")  # Debug statement
 
-
+    # method to save a game (this saves the current state of the game to a file)
     def save(self):
         # Print all states in the temp_log before saving
         print("States in log before saving:")
@@ -488,7 +333,7 @@ class Game_Functions(Board):
             os.remove(self.SAVED_LOG_PATH)
         self.persist_log('saved')
         print("Board state saved to saved log.")
-
+    # method to load a game (this takes the previously saved file from the file system and loads it into the game)
     def load(self):
         if not os.path.exists(self.SAVED_LOG_PATH):
             print("No saved game state exists.")
@@ -510,10 +355,10 @@ class Game_Functions(Board):
         self.set_remaining_turns(state['remaining_turns'])
         self.set_permissible_moves(state['permissible_moves'])
 
-        #self.printBoard()
+        # DEBUG self.printBoard()
         print("Board state loaded from log.")
-        #self.play_game()  # This will continue the game from the loaded state.
-    
+        # DEBUG self.play_game()  # This will continue the game from the loaded state.
+    # method to restart a game
     def new_restart_game(self):
         self.set_board_size(self.get_board_size())
         self.set_initial_positions()
@@ -524,25 +369,3 @@ class Game_Functions(Board):
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-
-
-
-'''
-def new_restart_game(self):
-    self.set_positions([0] * 24)
-    self.set_player_turn(1)
-    self.set_active_mills([])
-    self.set_remaining_turns(18)
-    if os.path.exists(self.TEMP_LOG_PATH):
-        os.remove(self.TEMP_LOG_PATH)
-    self.__temp_log = []  # clear the in-memory log
-
-    def cleanup(self):
-        if os.path.exists(self.TEMP_LOG_PATH):
-            print("\nGame exited, temporary log cleared.")
-            os.remove(self.TEMP_LOG_PATH)
-
-    def signal_handler(self, signal, frame):
-        self.cleanup()
-        sys.exit(0)
-'''
