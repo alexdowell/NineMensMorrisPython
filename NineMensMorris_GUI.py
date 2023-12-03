@@ -5,6 +5,26 @@ import time
 import pygame
 from NineMensMorris_Game import Game
 
+
+board = Game()
+# Set up the new board
+board_size = 0
+computer = 0
+# Extract board size from the system (from the previous screen)
+if len(sys.argv) > 1:
+    board_size_comm = sys.argv[1]
+    board_size = int(board_size_comm[0])
+    computer = int(board_size_comm[1])
+# Set up the board
+board.set_board_size(board_size)
+board.set_initial_positions()
+board.set_player_turn(1)
+board.set_initial_remaining_turns()
+board.set_initial_permissible_moves()
+board.set_game_mode(computer)
+
+
+
 # Global Variables
 
 # DEBUG - purposes for DEBUGGING
@@ -102,10 +122,13 @@ class GUI_State():
         self.selection_clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.selection_coords.values()]
         self.play_clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.play_coords.values()]
         self.replay_clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.replay_coords.values()]
-        self.clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.setupCoordsForClickables().values()]
+        self.clickables = None #[pygame.Rect(c[0], c[1], 30, 30) for c in self.coords.values()]
     
 
      # Setters
+    
+    def set_clickables(self, clickables):
+        self.clickables = clickables
 
     def set_board(self, board):
         self.board = board
@@ -145,8 +168,16 @@ class GUI_State():
 
     def set_play_length(self, play_length):
         self.play_length = play_length
-    def set_boardImg(self, boardImg):
-        self.boardImg = boardImg
+
+    def set_boardImg(self, boardImg3, boardImg6, boardImg9):
+        if(self.get_board().get_board_size() == 3):
+            self.boardImg = boardImg3
+        elif(self.get_board().get_board_size() == 6):
+            self.boardImg = boardImg6
+        elif(self.get_board().get_board_size() == 9):
+            self.boardImg = boardImg9
+        else:
+            raise Exception("Incorrect board size. Board image could not be set")
     def set_counter(self, counter):
         self.counter = counter
     def set_current_log(self, current_log):
@@ -157,7 +188,20 @@ class GUI_State():
         self.play_loop = play_loop
 
     # Getters
-
+    def get_clickables(self):
+        return self.clickables
+    def get_selection_clickables(self):
+        return self.selection_clickables
+    def get_play_clickables(self):
+        return self.play_clickables
+    def get_replay_clickables(self):
+        return self.replay_clickables
+    def get_selection_coords(self):
+        return self.selection_coords
+    def get_play_coords(self):
+        return self.play_coords
+    def get_replay_coords(self):
+        return self.replay_coords
     def get_board(self):
         return self.board
 
@@ -174,7 +218,7 @@ class GUI_State():
         return self.is_in_sleep
 
     def get_is_in_play(self):
-        return self.is_in_play
+        return self.get_is_in_play()
 
     def get_is_in_replay(self):
         return self.is_in_replay
@@ -212,15 +256,7 @@ class GUI_State():
     def get_play_loop(self):
         return self.play_loop 
 
-    def set_boardImg(self):
-        if(self.get_board().get_board_size() == 3):
-            self.boardImg = boardImg3
-        elif(self.board.get_board_size() == 6):
-            self.boardImg = boardImg6
-        elif(self.board.get_board_size() == 9):
-            self.boardImg = boardImg9
-        else:
-            raise Exception("Incorrect board size. Board image could not be set")
+    
     
     def setupLoadGame(self):
         variable_load = ""
@@ -240,30 +276,11 @@ class GUI_State():
             return False
         else:
             raise Exception("Something went wrong with setting up load game functionality")
-    
-    def setupBoard(self):
-        # Set up the new board
-        board_size = 0
-        computer = 0
-            # Extract board size from the system (from the previous screen)
-        if len(sys.argv) > 1:
-            board_size_comm = sys.argv[1]
-            board_size = int(board_size_comm[0])
-            computer = int(board_size_comm[1])
+       
 
-        # Set up the board
-        self.board.set_board_size(board_size)
-        self.board.set_initial_positions()
-        self.board.set_player_turn(1)
-        self.board.set_initial_remaining_turns()
-        self.board.set_initial_permissible_moves()
-        self.board.set_game_mode(computer)
-
-
-    
     def setupCoordsForClickables(self):
-        if(self.board.get_board_size() == 9):
-            self.coords = {
+        if(self.get_board().get_board_size() == 9):
+            self.set_coords({
                 0: (22, 22), # positions 0-23 are the 24 positions on the board
                 1: (230, 22),
                 2: (450, 22),
@@ -292,9 +309,9 @@ class GUI_State():
                 25: (550, 122), # save button
                 26: (550, 222), # load button
                 27: (550, 322) # restart button
-        }
-        elif(self.board.get_board_size() == 6):
-            self.coords = {
+            })
+        elif(self.get_board().get_board_size() == 6):
+            self.set_coords({
                 0: (12, 16),
                 1: (235, 16),
                 2: (460, 16),
@@ -315,9 +332,9 @@ class GUI_State():
                 17: (550, 122), # save button
                 18: (550, 222), # load button
                 19: (550, 322) # restart button
-        }
-        elif(self.board.get_board_size() == 3):
-            self.coords = {
+            })
+        elif(self.get_board().get_board_size() == 3):
+            self.set_coords({
                 0: (33, 34),
                 1: (238, 34),
                 2: (443, 34),
@@ -331,48 +348,49 @@ class GUI_State():
                 10: (550, 122), # save button
                 11: (550, 222), # load button
                 12: (550, 322) # restart button
-            }
+            })
         else:
             raise Exception("Something went wrong when establishing coordinates for clickables")
-        return self.coords
+        self.set_clickables(pygame.Rect(c[0], c[1], 30, 30) for c in self.get_coords().values())
+        
     def get_replay_restart_btn_coords(self):
-        if self.board.get_board_size() == 3:
-            return self.coords[9], self.coords[10], self.coords[11], self.coords[12]
-        elif self.board.get_board_size() == 6:
-            return self.coords[16], self.coords[17], self.coords[18], self.coords[19]
-        elif self.board.get_board_size() == 9:
-            return self.coords[24], self.coords[25], self.coords[26], self.coords[27]
+        if self.get_board().get_board_size() == 3:
+            return self.get_coords()[9], self.get_coords()[10], self.get_coords()[11], self.get_coords()[12]
+        elif self.get_board().get_board_size() == 6:
+            return self.get_coords()[16], self.get_coords()[17], self.get_coords()[18], self.get_coords()[19]
+        elif self.get_board().get_board_size() == 9:
+            return self.get_coords()[24], self.get_coords()[25], self.get_coords()[26], self.get_coords()[27]
     
     # Functions to draw the game state
     def draw_board(self, screen):
         try:
             # Draw the background board
-            screen.blit(self.boardImg.convert(), (0, 0))
+            screen.blit(self.get_boardImg().convert(), (0, 0))
 
             # Draw borders around the clickable areas
-            if DEBUG and not (self.is_in_replay and self.is_in_play):
-                clickables_to_draw = self.replay_clickables if self.is_in_replay else self.clickables
+            if DEBUG and not (self.get_is_in_replay() and self.get_is_in_play()):
+                clickables_to_draw = self.get_replay_clickables() if self.get_is_in_replay() else self.get_clickables()
                 for rect in clickables_to_draw:
                     pygame.draw.rect(screen, BLACK, rect, 1)
 
             # Draw the pieces on the board
-            for pos, value in enumerate(self.board.get_positions()):
-                x, y = self.coords[pos]
+            for pos, value in enumerate(self.get_board().get_positions()):
+                x, y = self.get_coords()[pos]
                 piece_img = pantherimg.convert_alpha() if value == 1 else dragonimg.convert_alpha()
                 screen.blit(piece_img, (x, y))
 
             # Highlight selected piece with a green rectangle
-            if self.startpos is not None:
-                x, y = self.coords[self.startpos]
+            if self.get_startpos() is not None:
+                x, y = self.get_coords()[self.get_startpos()]
                 pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
 
             # Draw the selection buttons for game mode
-            if self.is_in_game_mode_selection:
-                screen.blit(single_player.convert_alpha(), (self.selection_coords[1]))
-                screen.blit(multi_player.convert_alpha(), (self.selection_coords[2]))
+            if self.get_is_in_game_mode_selection:
+                screen.blit(single_player.convert_alpha(), (self.get_selection_coords()[1]))
+                screen.blit(multi_player.convert_alpha(), (self.get_selection_coords()[2]))
 
             # Draw replay and other buttons based on the game state
-            self.draw_buttons(screen, self.is_in_replay, self.is_in_play)
+            self.draw_buttons(screen, self.get_is_in_replay(), self.get_is_in_play())
         except Exception as e:
             print(f"Error drawing the board: {e}")
     
@@ -391,7 +409,7 @@ class GUI_State():
             screen.blit(restart_button.convert_alpha(), restart_button_coord)
 
         elif replay and not play:
-            rewind_button_coord, play_button_coord, fast_forward_button_coord, back_button_coord = self.replay_coords[1:]
+            rewind_button_coord, play_button_coord, fast_forward_button_coord, back_button_coord = self.get_replay_coords()[1:]
 
             screen.blit(rewind_button.convert_alpha(), rewind_button_coord)
             screen.blit(play_button.convert_alpha(), play_button_coord)
@@ -399,59 +417,59 @@ class GUI_State():
             screen.blit(back_button.convert_alpha(), back_button_coord)
 
         elif replay and play:
-            play_button_coord, pause_button_coord, back_button_coord = self.play_coords[1:]
+            play_button_coord, pause_button_coord, back_button_coord = self.get_play_coords()[1:]
 
             screen.blit(play_button.convert_alpha(), play_button_coord)
             screen.blit(pause_button.convert_alpha(), pause_button_coord)
             screen.blit(back_button.convert_alpha(), back_button_coord)
 
     def get_replay_restart_button_coords(self):
-        return self.get_replay_restart_btn_coords(self.board.get_board_size())
+        return self.get_replay_restart_btn_coords(self.get_board().get_board_size())
     
     def draw_game_info(self, screen):
         texts = []
-        gridlocked = self.board.is_gridlocked()
+        gridlocked = self.get_board().is_gridlocked()
         if self.is_gameover:
-            if self.is_in_replay:
+            if self.get_is_in_replay():
                 texts = ["In Replay Mode"]
             elif gridlocked:
                 texts = [
-                    f"Player {2 if self.board.get_player_turn() == 1 else 1} is gridlocked! Player {2 if self.board.get_player_turn() == 1 else 1} wins!",
+                    f"Player {2 if self.get_board().get_player_turn() == 1 else 1} is gridlocked! Player {2 if self.get_board().get_player_turn() == 1 else 1} wins!",
                     "Close window to change game settings or click Restart"
                 ]
             else:
                 texts = [
-                    f"Game Over! Player {2 if self.board.get_player_turn() == 1 else 1} wins!",
+                    f"Game Over! Player {2 if self.get_board().get_player_turn() == 1 else 1} wins!",
                     "Close window to change game settings or click Restart"
                 ]
-        elif not self.is_gameover and not self.is_in_game_mode_selectiongame_mode_selection:
-            if self.board.get_remaining_turns() != 0:
-                if self.can_removepiece:
+        elif not self.get_is_gameover() and not self.get_is_in_game_mode_selection():
+            if self.get_board().get_remaining_turns() != 0:
+                if self.get_can_removepiece():
                     texts = [
-                        f"Player {1 if self.board.get_player_turn() == 1 else 2} formed a mill!",
+                        f"Player {1 if self.get_board().get_player_turn() == 1 else 2} formed a mill!",
                         "Select an opponent's piece to remove from the board."
                     ]
-                elif self.is_in_replay:
+                elif self.get_is_in_replay():
                     texts = ["In Replay Mode"]
                 else:
                     texts = [
-                        f"It's Player {1 if self.board.get_player_turn() == 1 else 2}'s turn!",
-                        f"Remaining Turns: {self.board.get_remaining_turns()}"
+                        f"It's Player {1 if self.get_board().get_player_turn() == 1 else 2}'s turn!",
+                        f"Remaining Turns: {self.get_board().get_remaining_turns()}"
                     ]
-            elif self.board.get_remaining_turns() == 0:
-                if self.can_removepiece:
+            elif self.get_board().get_remaining_turns() == 0:
+                if self.get_can_removepiece():
                     texts = [
-                        f"Player {1 if self.board.get_player_turn() == 1 else 2} formed a mill!",
+                        f"Player {1 if self.get_board().get_player_turn() == 1 else 2} formed a mill!",
                         "Select an opponent's piece to remove from the board."
                     ]
-                elif self.is_in_replay:
+                elif self.get_is_in_replay():
                     texts = ["In Replay Mode"]
                 else:
                     texts = [
-                        f"It's Player {1 if self.board.get_player_turn() == 1 else 2}'s turn!",
+                        f"It's Player {1 if self.get_board().get_player_turn() == 1 else 2}'s turn!",
                         "It's time to move pieces! Select a piece to move then select the position you want to move to."
                     ]
-        elif self.is_in_game_mode_selection:
+        elif self.get_is_in_game_mode_selection:
             texts = ["Select Game Mode"]
 
         for i, text in enumerate(texts):
@@ -461,13 +479,13 @@ class GUI_State():
     def handle_mouse_up_events(self, 
                                event):
         try:
-            if self.is_in_replay:
-                for i, rect in enumerate(self.replay_clickables):
+            if self.get_is_in_replay():
+                for i, rect in enumerate(self.get_replay_clickables()):
                     if rect.collidepoint(event.pos):
                         self.handle_replay_click(i)
                         break
             else:
-                for i, rect in enumerate(self.clickables):
+                for i, rect in enumerate(self.get_clickables()):
                     if rect.collidepoint(event.pos):
                         self.handle_main_game_click(i)
                         break
@@ -477,46 +495,46 @@ class GUI_State():
 
     def handle_side_btn_click(self, clicked_pos):
         payload_side_btn_click = None
-        if self.board.get_board_size() == 9:
+        if self.get_board().get_board_size() == 9:
             if clicked_pos == 24:
-                self.current_log = self.board.get_current_state_log()
-                self.is_in_replay = True
+                self.set_current_log(self.get_board().get_current_state_log())
+                self.set_is_in_replay(True)
             elif(clicked_pos == 25):
-                self.board.save()
+                self.get_board().save()
             elif(clicked_pos == 26):
-                self.board.load()
+                self.get_board().load()
             elif(clicked_pos == 27):
-                self.board.new_restart_game()
-                self.is_gameover = False
-        elif(self.board.get_board_size() == 6):
+                self.get_board().new_restart_game()
+                self.set_is_gameover(False)
+        elif(self.get_board().get_board_size() == 6):
             if(clicked_pos == 16):
-                self.current_log = self.board.get_current_state_log()
-                self.is_in_replay = True
+                self.set_current_log(self.get_board().get_current_state_log())
+                self.set_is_in_replay(True)
             elif(clicked_pos == 17):
-                self.board.save()
+                self.get_board().save()
             elif(clicked_pos == 18):
-                self.board.load()
+                self.get_board().load()
             elif(clicked_pos == 19):
-                self.board.new_restart_game()
-                self.is_gameover = False
-        elif(self.board.get_board_size() == 3):
+                self.get_board().new_restart_game()
+                self.set_is_gameover(False)
+        elif(self.get_board().get_board_size() == 3):
             if(clicked_pos == 9):
-                self.current_log = self.board.get_current_state_log()
-                self.is_in_replay = True
+                self.set_current_log(self.get_board().get_current_state_log())
+                self.set_is_in_replay(True)
             elif(clicked_pos == 10):
-                self.board.save()
+                self.get_board().save()
             elif(clicked_pos == 11):
-                self.board.load()
+                self.get_board().load()
             elif(clicked_pos == 12):
-                self.board.new_restart_game()
-                self.is_gameover = False
+                self.get_board().new_restart_game()
+                self.set_is_gameover(False)
         else:
             raise Exception("Incorrect board size. Something went wrong")
     
-        if self.current_log != None:
-            payload_side_btn_click = [self.is_in_replay, self.is_gameover, self.current_log]
+        if self.get_current_log() != None:
+            payload_side_btn_click = [self.get_is_in_replay(), self.get_is_gameover(), self.get_current_log()]
         else:
-            payload_side_btn_click = [self.is_in_replay, self.is_gameover]
+            payload_side_btn_click = [self.get_is_in_replay(), self.get_is_gameover()]
     
         return payload_side_btn_click
     
@@ -528,25 +546,25 @@ class GUI_State():
             # Add logic here
             # result is the current log, whether or not the game is in replay mode, and whether the game is over
             result = self.handle_side_btn_click(clicked_pos)
-            self.is_in_replay = result[0]
-            self.is_gameover = result[1]
+            self.set_is_in_replay(result[0])
+            self.set_is_gameover(result[1])
             if len(result) == 3:
-                self.current_log = result[2]
+                self.set_current_log(result[2])
             else:
                 raise Exception("HANDLING SIDE BUTTON CLICK (SAVE, LOAD, RESTART, REPLAY) ===> Something went wrong when reading result")
             # if a piece can be removed
-            if self.can_removepiece:
+            if self.get_can_removepiece():
                 # check if a mill was formed
-                if self.board.form_mill(clicked_pos):
+                if self.get_board().form_mill(clicked_pos):
                     # check if a moved or flown piece was from a previously formed mill
-                    self.board.check_remove_active_mill()
+                    self.get_board().check_remove_active_mill()
                     # set check if a piece can be removed to false
-                    self.can_removepiece = False
+                    self.set_can_removepiece(False)
                     # save current state to the log and switches the turn
-                    self.board.save_current_state_to_log()
+                    self.get_board().save_current_state_to_log()
                     # check if the game is over or gridlocked (This gameover check only happens in 6 mens or 9 mens morris)
-                    if (self.board.is_game_over() or self.board.is_gridlocked()) and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9) and self.board.get_remaining_turns() == 0:
-                        self.is_gameover = True
+                    if (self.get_board().is_game_over() or self.get_board().is_gridlocked()) and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9) and self.get_board().get_remaining_turns() == 0:
+                        self.set_is_gameover(True)
                     else:
                         raise Exception("9 MENS or 6 MENS ===> Something went wrong when a mill was formed and the game was over")
                 else:
@@ -554,123 +572,124 @@ class GUI_State():
             else:
                 raise Exception("9 MENS or 6 MENS ===> Something went wrong when removing a piece.")
             # Placing pieces phase
-            if self.board.get_remaining_turns() != 0:
+            if self.get_board().get_remaining_turns() != 0:
                 # player places a piece on the board
-                if self.board.place_piece(clicked_pos):
+                if self.get_board().place_piece(clicked_pos):
                     # check if a moved or flown piece was from a previously formed mill
-                    self.board.check_remove_active_mill()
+                    self.get_board().check_remove_active_mill()
                     # check if a mill was formed in the GUI, removepiece is set to true if 9 mens or 6 mens
-                    if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
-                        self.can_removepiece = True
+                    if self.get_board().form_mill_GUI() and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
+                        self.set_can_removepiece(True)
                     # check if a mill was formed in the GUI, save state to log and it is gameover for 3 mens
-                    elif self.board.form_mill_GUI() and self.board.get_board_size() == 3:
-                        self.board.save_current_state_to_log()
-                        self.is_gameover = True
+                    elif self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
+                        self.get_board().save_current_state_to_log()
+                        self.set_is_gameover(True)
                     else:
                         raise Exception("PLACE PIECE PHASE ===> Something went wrong when checking in the GUI if a mill was formed")
                     # save state to log whenever a piece is placed
-                    self.board.save_current_state_to_log()
+                    self.get_board().save_current_state_to_log()
             # Move/Fly piece phase
-            elif self.board.get_remaining_turns() == 0:
+            elif self.get_board().get_remaining_turns() == 0:
                 # check if the game is over or gridlocked, if so, game is over
-                if self.board.is_game_over() or self.board.is_gridlocked():
-                    self.is_gameover = True
+                if self.get_board().is_game_over() or self.get_board().is_gridlocked():
+                    self.set_is_gameover(True)
                 else:
                     raise Exception("MOVE/FLY PIECE PHASE ===> Something went wrong when evaluating if the game is over")
                 # grab current position of player AND... 
-                if self.startpos == None:
-                    self.startpos = clicked_pos
+                if self.get_startpos() == None:
+                    self.set_startpos(clicked_pos)
                 else:
                     raise Exception("MOVE/FLY PIECE PHASE ===> Something went wrong when grabbing the current position of piece")
                 # grab end position of player for moving or flying pieces
-                if self.startpos != None:
-                    self.endpos = clicked_pos
+                if self.get_startpos() != None:
+                    self.set_endpos(clicked_pos)
                 else:
                     raise Exception("MOVE/FLY PIECE PHASE ====> Something went wrong when grabbing the end position of piece")
             
                 # start of fly piece logic (you can only fly pieces in 9 mens or 6 mens)
-                if self.board.player_piece_count() == 3 and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
+                if self.get_board().player_piece_count() == 3 and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
                     # player flies a piece
-                    if self.board.fly_piece(self.startpos, self.endpos):
+                    if self.get_board().fly_piece(self.get_startpos(), self.get_endpos()):
                         # check if a flown piece was from a previously formed mill
-                        self.board.check_remove_active_mill()
+                        self.get_board().check_remove_active_mill()
                         # check if a mill was formed in the GUI
-                        if self.board.form_mill_GUI():
+                        if self.get_board().form_mill_GUI():
                             # set the check if a piece can be removed to true
-                            self.can_removepiece = True
+                            self.set_can_removepiece(True)
                             # reset current position of piece flown and end position of piece flown
-                            self.startpos = None
-                            self.endpos = None
+                            self.set_startpos(None)
+                            self.set_endpos(None)
                         else:
                             raise Exception("FLY PIECE PHASE ===> Something went wrong when checking if a mill formed in the GUI")
                         # save the current state to the log and switch turn
-                        self.board.save_current_state_to_log()
+                        self.get_board().save_current_state_to_log()
                         # reset current position of piece flown and end position of piece flown
-                        self.startpos = None
-                        self.endpos = None
+                        self.set_startpos(None)
+                        self.set_endpos(None)
                     else:
                         # reset current position of piece flown and end position of piece flown
-                        self.startpos = None
-                        self.endpos = None
+                        self.set_startpos(None)
+                        self.set_endpos(None)
                 else:
                     # start of move piece logic
-                    if self.board.move_piece(self.startpos, self.endpos):
+                    if self.get_board().move_piece(self.get_startpos(), self.get_endpos()):
                         # check if a moved piece was from a previously formed mill
-                        self.board.check_remove_active_mill()
+                        self.get_board().check_remove_active_mill()
                         # check if a mill was formed in the GUI and if it is 6 mens or 9 mens
-                        if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
+                        if self.get_board().form_mill_GUI() and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
                             # set the check if a piece can be removed to true
-                            self.can_removepiece = True
-                            # reset current position of piece flown and end position of piece moved
-                            self.startpos = None
-                            self.endpos = None
+                            self.set_can_removepiece(True)
+                            # reset current position of piece flown and end position of piece flown
+                            self.set_startpos(None)
+                            self.set_endpos(None)
                         # check if a mill was formed in the GUI and if it is 3 mens
-                        elif self.board.form_mill_GUI() and self.board.get_board_size() == 3:
+                        elif self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
                             # save the current state to the log and switch turn
-                            self.board.save_current_state_to_log()
+                            self.get_board().save_current_state_to_log()
                             # the game is over
-                            self.is_gameover = True
+                            self.set_is_gameover(True)
                         else:
                             raise Exception("MOVE PIECE PHASE ===> Something went wrong when checking if a mill was formed in the GUI")
                         # save the current state to the log and switch turn
-                        self.board.save_current_state_to_log()
+                        self.get_board().save_current_state_to_log()
                         # reset current position of piece flown and end position of piece moved
-                        self.startpos = None
-                        self.endpos = None
+                        self.set_startpos(None)
+                        self.set_endpos(None)
                     else:
                         # reset current position of piece flown and end position of piece moved
-                        self.startpos = None
-                        self.endpos = None
+                        self.set_startpos(None)
+                        self.set_endpos(None)
         except Exception as e:
             print(f"Error handling main game click: {e}")
     
     def handle_computer_turn(self):
-        if self.board.get_remaining_turns() != 0:
-            self.board.computer_place_piece()
-            if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
-                self.can_removepiece = True
-                remove_piece = self.board.computer_remove_piece()
-            elif self.board.form_mill_GUI() and self.board.get_board_size() == 3:
-                self.is_gameover = True
-            if self.can_removepiece == True:
-                if self.board.form_mill(remove_piece):
-                    self.can_removepiece = False
-                    self.board.check_remove_active_mill()
-        elif(self.board.get_remaining_turns() == 0):
-            if self.board.player_piece_count() != 3:
-                self.board.computer_move_piece()
-            elif self.board.player_piece_count() == 3 and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
-                self.board.computer_fly_piece() 
-                if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
-                    self.can_removepiece= True
-                    remove_piece = self.board.computer_remove_piece()
-                if self.board.form_mill_GUI() and self.board.get_board_size() == 3:
-                    self.is_gameover = True
-                if self.can_removepiece == True:
-                    if self.board.form_mill(remove_piece):
-                        self.can_removepiece = False
-                        self.board.check_remove_active_mill()
-        self.board.save_current_state_to_log()
+        if self.get_board().get_remaining_turns() != 0:
+            self.get_board().computer_place_piece()
+            if self.get_board().form_mill_GUI() and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
+                self.set_can_removepiece(True)
+                remove_piece = self.get_board().computer_remove_piece()
+            elif self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
+                self.set_is_gameover(True)
+            if self.get_can_removepiece():
+                if self.get_board().form_mill(remove_piece):
+                    self.set_can_removepiece(False)
+                    self.get_board().check_remove_active_mill()
+        
+        elif(self.get_board().get_remaining_turns() == 0):
+            if self.get_board().player_piece_count() != 3:
+                self.get_board().computer_move_piece()
+            elif self.get_board().player_piece_count() == 3 and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
+                self.get_board().computer_fly_piece() 
+                if self.get_board().form_mill_GUI() and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
+                    self.set_can_removepiece(True)
+                    remove_piece = self.get_board().computer_remove_piece()
+                if self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
+                    self.set_is_gameover(True)
+                if self.get_can_removepiece(True):
+                    if self.get_board().form_mill(remove_piece):
+                        self.set_can_removepiece(False)
+                        self.get_board().check_remove_active_mill()
+        self.get_board().save_current_state_to_log()
 
 
 
@@ -717,8 +736,8 @@ class GUI_State():
         while running:
             try:
                 # Event handling
-                if not self.is_in_game_mode_selection:
-                    if not self.is_in_play:
+                if not self.get_is_in_game_mode_selection:
+                    if not self.get_is_in_play():
                         for event in pygame.event.get():
                             # DEBUG print(f"Event: {event}")
                             if event.type == pygame.QUIT:
@@ -727,23 +746,23 @@ class GUI_State():
                                 break
                             if event.type == pygame.MOUSEBUTTONUP:
                                 self.handle_mouse_up_events(event)
-                    if self.is_in_play:
+                    if self.get_is_in_play():
                         print("Game is in replay play mode")
                         #self.handle_play_events(event)
                 
-                if self.is_in_game_mode_selection:
+                if self.get_is_in_game_mode_selection:
                     print("Game is in game mode selection")
                     #self.handle_game_mode_selection(pygame.event.get())
                 
-                if self.board.get_player_turn() == 2 and self.board.get_game_mode() == 1:
+                if self.get_board().get_player_turn() == 2 and self.get_board().get_game_mode() == 1:
                     self.handle_computer_turn()
             
                 screen.fill(WHITE)
-                self.boardImg = self.set_boardImg()
+                self.set_boardImg(boardImg3, boardImg6, boardImg9)
                 self.draw_board(screen)
-                if self.is_in_sleep:
+                if self.get_is_in_sleep():
                     time.sleep(1)
-                    self.is_in_sleep = False
+                    self.set_is_in_sleep(False)
                 self.draw_game_info(screen)
                 pygame.display.flip()
                 clock.tick(60)
@@ -754,9 +773,9 @@ class GUI_State():
 
 
 gamestate = GUI_State()
-gamestate.setupBoard()
+gamestate.set_board(board)
+gamestate.setupCoordsForClickables()
 gamestate.game_loop()
-
 
 '''
 # Functions to draw the game state
