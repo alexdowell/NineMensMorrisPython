@@ -369,3 +369,75 @@ class Game(Board):
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
+    
+    def get_current_state_log(self):
+        print("replay function called")
+        if not os.path.exists(self.TEMP_LOG_PATH):
+            print("No saved game states to replay.")
+            return
+        with open(self.TEMP_LOG_PATH, "rb") as file:
+            log = pickle.load(file)
+        if not log:
+            print("Log is empty. Nothing to replay.")
+            return
+        # Save current state
+        current_state = {
+            'board_size': self.get_board_size(),
+            'positions': self.get_positions(),
+            'player_turn': self.get_player_turn(),
+            'active_mills': self.get_active_mills(),
+            'remaining_turns': self.get_remaining_turns(),
+            'permissible_moves': self.get_permissible_moves(),
+            'game_mode': self.get_game_mode()
+        }
+        current_log = [log,current_state]
+        return current_log
+    
+    def change_replay_state(self, state):
+        self.set_board_size(state['board_size'])
+        self.set_board_size(state['board_size'])
+        self.set_positions(state['positions'])
+        self.set_player_turn(state['player_turn'])
+        self.set_active_mills(state['active_mills'])
+        self.set_remaining_turns(state['remaining_turns'])
+        self.set_game_mode(state['game_mode'])
+
+
+    def replay_handler(self, replay_option, replay_state):
+        current_state_log = self.get_current_state_log()
+        log = current_state_log[0]
+        current_state = current_state_log[1]
+        index = replay_state
+        if log is None or current_state is None:
+            print("Error: Log or current state is None")
+            return
+        if replay_option == 0: # rewind a move button
+            if index != 0:
+                index -= 1
+                replay_state = index
+            else:
+                index = 0
+                replay_state = index
+            state = log[replay_state]
+            self.change_replay_state(state)
+            return replay_state
+        elif replay_option == 2:
+            if index != (len(log)-1): # fast forward button
+                index += 1
+                replay_state = index
+            else:
+                index = 0
+                replay_state = index
+        # DEBUG print("log length: ", len(log))
+        # DEBUG print("index: ", index)
+            state = log[replay_state]
+            self.change_replay_state(state)
+            return replay_state
+        if replay_option == 3: # exit replay button
+            #reset current state
+            self.change_replay_state(current_state)
+            return
+
+
+
+        
