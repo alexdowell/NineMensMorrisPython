@@ -72,7 +72,6 @@ class GUI_State():
         self.is_paused = False
         self.is_gameover = False
         self.can_removepiece = False
-        self.is_running = True
         # all other data members
         self.startpos = None
         self.endpos = None
@@ -104,9 +103,117 @@ class GUI_State():
         self.play_clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.play_coords.values()]
         self.replay_clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.replay_coords.values()]
         self.clickables = [pygame.Rect(c[0], c[1], 30, 30) for c in self.setupCoordsForClickables().values()]
+    
+
+     # Setters
+
+    def set_board(self, board):
+        self.board = board
+
+    def set_coords(self, coords):
+        self.coords = coords
+
+    def set_is_load(self, is_load):
+        self.is_load = is_load
+
+    def set_is_in_game_mode_selection(self, is_in_game_mode_selection):
+        self.is_in_game_mode_selection = is_in_game_mode_selection
+
+    def set_is_in_sleep(self, is_in_sleep):
+        self.is_in_sleep = is_in_sleep
+    
+    def set_is_in_play(self, is_in_play):
+        self.is_in_play = is_in_play
+    
+    def set_is_in_replay(self, is_in_replay):
+        self.is_in_replay = is_in_replay
+    
+    def set_is_paused(self, is_paused):
+        self.is_paused = is_paused
+
+    def set_is_gameover(self, is_gameover):
+        self.is_gameover = is_gameover
+
+    def set_can_removepiece(self, can_removepiece):
+        self.can_removepiece = can_removepiece
+
+    def set_startpos(self, startpos):
+        self.startpos = startpos
+
+    def set_endpos(self, endpos):
+        self.endpos = endpos
+
+    def set_play_length(self, play_length):
+        self.play_length = play_length
+    def set_boardImg(self, boardImg):
+        self.boardImg = boardImg
+    def set_counter(self, counter):
+        self.counter = counter
+    def set_current_log(self, current_log):
+        self.current_log = current_log
+    def set_replay_state(self, replay_state):
+        self.replay_state = replay_state
+    def set_play_loop(self, play_loop):
+        self.play_loop = play_loop
+
+    # Getters
+
+    def get_board(self):
+        return self.board
+
+    def get_coords(self):
+        return self.coords
+
+    def get_is_load(self):
+        return self.is_load
+
+    def get_is_in_game_mode_selection(self):
+        return self.is_in_game_mode_selection
+
+    def get_is_in_sleep(self):
+        return self.is_in_sleep
+
+    def get_is_in_play(self):
+        return self.is_in_play
+
+    def get_is_in_replay(self):
+        return self.is_in_replay
+
+    def get_is_paused(self):
+        return self.is_paused
+
+    def get_is_gameover(self):
+        return self.is_gameover
+
+    def get_can_removepiece(self):
+        return self.can_removepiece
+    
+    def get_startpos(self):
+        return self.startpos
+
+    def get_endpos(self):
+        return self.endpos
+
+    def get_play_length(self):
+        return self.play_length
+
+    def get_boardImg(self):
+        return self.boardImg
+
+    def get_counter(self):
+        return self.counter
+
+    def get_current_log(self):
+        return self.current_log
+
+    def get_replay_state(self):
+        return self.replay_state
+
+    def get_play_loop(self):
+        return self.play_loop 
 
     def set_boardImg(self):
-        if(self.board.get_board_size() == 3):
+        if(self.get_board().get_board_size() == 3):
             self.boardImg = boardImg3
         elif(self.board.get_board_size() == 6):
             self.boardImg = boardImg6
@@ -115,10 +222,6 @@ class GUI_State():
         else:
             raise Exception("Incorrect board size. Board image could not be set")
     
-
-
-    
-
     def setupLoadGame(self):
         variable_load = ""
         # Check if the load_game.txt file exists and create it if it doesn't
@@ -542,22 +645,35 @@ class GUI_State():
             print(f"Error handling main game click: {e}")
     
     def handle_computer_turn(self):
-        if self.board.get_player_turn() == 2 and self.board.get_game_mode() == 1:
-            if self.board.get_remaining_turns() != 0:
-                self.board.computer_place_piece()
+        if self.board.get_remaining_turns() != 0:
+            self.board.computer_place_piece()
+            if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
+                self.can_removepiece = True
+                remove_piece = self.board.computer_remove_piece()
+            elif self.board.form_mill_GUI() and self.board.get_board_size() == 3:
+                self.is_gameover = True
+            if self.can_removepiece == True:
+                if self.board.form_mill(remove_piece):
+                    self.can_removepiece = False
+                    self.board.check_remove_active_mill()
+        elif(self.board.get_remaining_turns() == 0):
+            if self.board.player_piece_count() != 3:
+                self.board.computer_move_piece()
+            elif self.board.player_piece_count() == 3 and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
+                self.board.computer_fly_piece() 
                 if self.board.form_mill_GUI() and (self.board.get_board_size() == 6 or self.board.get_board_size() == 9):
-                    self.can_removepiece = True
+                    self.can_removepiece= True
                     remove_piece = self.board.computer_remove_piece()
                 if self.board.form_mill_GUI() and self.board.get_board_size() == 3:
-                    #print("Game over!")
-                    #print(f"Player {2 if board.get_player_turn() == 1 else 1} wins!")
                     self.is_gameover = True
                 if self.can_removepiece == True:
                     if self.board.form_mill(remove_piece):
                         self.can_removepiece = False
                         self.board.check_remove_active_mill()
+        self.board.save_current_state_to_log()
 
-            elif()
+
+
                 
             
 
@@ -597,7 +713,8 @@ class GUI_State():
         # DEBUG print("Initializing game window")
         screen.fill(WHITE)
         clock = pygame.time.Clock()
-        while self.is_running:
+        running = True
+        while running:
             try:
                 # Event handling
                 if not self.is_in_game_mode_selection:
@@ -606,7 +723,7 @@ class GUI_State():
                             # DEBUG print(f"Event: {event}")
                             if event.type == pygame.QUIT:
                                 # DEBUG print("Quit event detected. Closing game window...")
-                                self.is_running = False
+                                running = False
                                 break
                             if event.type == pygame.MOUSEBUTTONUP:
                                 self.handle_mouse_up_events(event)
@@ -617,8 +734,9 @@ class GUI_State():
                 if self.is_in_game_mode_selection:
                     print("Game is in game mode selection")
                     #self.handle_game_mode_selection(pygame.event.get())
-            
-                self.handle_computer_turn()
+                
+                if self.board.get_player_turn() == 2 and self.board.get_game_mode() == 1:
+                    self.handle_computer_turn()
             
                 screen.fill(WHITE)
                 self.boardImg = self.set_boardImg()
@@ -631,7 +749,14 @@ class GUI_State():
                 clock.tick(60)
             except Exception as e:
                 print(f"Error in game loop: {e}")
-                self.is_running = False
+                running = False
+    
+
+
+gamestate = GUI_State()
+gamestate.setupBoard()
+gamestate.game_loop()
+
 
 '''
 # Functions to draw the game state
@@ -1164,7 +1289,4 @@ def game_loop(is_loaded):
 
 '''
 
-
-
-game_loop()
 
