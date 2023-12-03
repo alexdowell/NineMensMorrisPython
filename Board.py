@@ -377,51 +377,78 @@ class Game_Functions(Board):
                     return False
         #print(f"Player {opponent} is gridlocked and Player {self.get_player_turn()} wins!")
         return True
-    
-    def computer_move_to(self, move_from):
-        permissible_moves = self.get_permissible_moves()[move_from]
-        positions = self.get_positions()
-        mill_combinations = self.mill_list()
-
-        for move in permissible_moves:
-            if not self.is_occupied(move):
-                # Check for blocking human mills
-                if self.blocks_opponent_mill(move_from, move, positions, mill_combinations):
-                    return move
-                # Check for forming computer mills
-                if self.forms_own_mill(move_from, move, positions, mill_combinations):
-                    return move
-                # Check for creating two-in-a-row
-                if self.creates_two_in_a_row(move_from, move, positions, mill_combinations):
-                    return move
-
-        return random.choice(permissible_moves) if permissible_moves else None
 
     def computer_move_from(self):
         positions = self.get_positions()
         computer_positions = [pos for pos, player in enumerate(positions) if player == 2]
+        print("computer positions: ", computer_positions)
         mill_combinations = self.mill_list()
 
         for current_position in computer_positions:
             for move in self.get_permissible_moves()[current_position]:
                 if not self.is_occupied(move):
                     # Check for blocking human mills
+                    print("about to check for blocking human mills")
                     if self.blocks_opponent_mill(current_position, move, positions, mill_combinations):
-                        return current_position
+                        print("blocking human mill")
+                        from_and_to = [current_position, move]
+                        return from_and_to
+        for current_position in computer_positions:
+            print("current position: ", current_position)
+            for move in self.get_permissible_moves()[current_position]:
+                print("permissible_moves: ", self.get_permissible_moves()[current_position])
+                if not self.is_occupied(move):
                     # Check for forming computer mills
-                    if self.forms_own_mill(current_position, move, positions, mill_combinations):
-                        return current_position
+                    print("about to check for forming computer mill")
+                    if self.forms_own_new_mill(current_position, move, positions, mill_combinations):
+                        print("forming computer mill")
+                        from_and_to = [current_position, move]
+                        return from_and_to
+        for current_position in computer_positions:
+            print("current position: ", current_position)
+            for move in self.get_permissible_moves()[current_position]:
+                print("permissible_moves: ", self.get_permissible_moves()[current_position])
+                if not self.is_occupied(move):
+                    # Check for forming computer mills
+                    print("about to check for un forming computer mill for next turn")
+                    if self.un_form_computer_mill(current_position, positions):
+                        print("un forming computer mill")
+                        from_and_to = [current_position, move]
+                        return from_and_to
+        for current_position in computer_positions:
+            for move in self.get_permissible_moves()[current_position]:
+                if not self.is_occupied(move):
                     # Check for creating two-in-a-row
+                    print("about to check for two in a row")
                     if self.creates_two_in_a_row(current_position, move, positions, mill_combinations):
-                        return current_position
-
-        return random.choice(computer_positions) if computer_positions else None
-    
+                        print("creating two in a row")
+                        from_and_to = [current_position, move]
+                        return from_and_to
+        still_thinking = True
+        while still_thinking == True:
+            choice = random.choice(computer_positions) if computer_positions else None
+            for move in self.get_permissible_moves()[choice]:
+                if not self.is_occupied(choice):
+                    still_thinking = False
+        return [choice, move]
+            
     def blocks_opponent_mill(self, current_position, new_position, positions, mill_combinations):
         positions[current_position] = 0
+        positions[new_position] = 1
+        for combo in mill_combinations:
+            if all(positions[pos] == 1 for pos in combo) and new_position in combo:
+                positions[current_position] = 2
+                positions[new_position] = 0
+                return True
+        positions[current_position] = 2
+        positions[new_position] = 0
+        return False
+    #makes sure that a new mill is formed with the new position
+    def forms_own_new_mill(self, current_position, new_position, positions, mill_combinations):
+        positions[current_position] = 0
         positions[new_position] = 2
         for combo in mill_combinations:
-            if all(positions[pos] == 1 for pos in combo) and positions[new_position] == 0:
+            if all(positions[pos] == 2 for pos in combo) and new_position in combo:
                 positions[current_position] = 2
                 positions[new_position] = 0
                 return True
@@ -429,17 +456,19 @@ class Game_Functions(Board):
         positions[new_position] = 0
         return False
 
-    def forms_own_mill(self, current_position, new_position, positions, mill_combinations):
-        positions[current_position] = 0
-        positions[new_position] = 2
-        for combo in mill_combinations:
-            if all(positions[pos] == 2 for pos in combo):
-                positions[current_position] = 2
-                positions[new_position] = 0
+    def un_form_computer_mill(self, current_position, positions):
+        # get the current player's active mills
+        active_mills = self.get_active_mills()
+        computers_active_mills = []
+        for mill in active_mills:
+            if positions[mill[0]] == positions[mill[1]] == positions[mill[2]] == 2:
+                computers_active_mills.append(mill)
+        # look and see if current position is in the computers active mills. If it is, then return true, otherwise return false
+        for mill in computers_active_mills:
+            if current_position in mill:
                 return True
-        positions[current_position] = 2
-        positions[new_position] = 0
         return False
+
 
     def creates_two_in_a_row(self, current_position, new_position, positions, mill_combinations):
         positions[current_position] = 0
@@ -520,7 +549,8 @@ class Game_Functions(Board):
                     return pos
 
     def computer_fly_piece(self):
-        current_position = self.computer_move_from()
+        from_and_to = self.computer_move_from()
+        current_position = from_and_to[0]
         move_to = self.computer_fly_to()
         self.fly_piece(current_position, move_to)
         print(f"Computer flew a piece from {current_position} to {move_to}")
@@ -532,14 +562,12 @@ class Game_Functions(Board):
         print("Computer placed a piece at position", position)
 
     def computer_move_piece(self):
-        current_position = self.computer_move_from()
-        move_to = self.computer_move_to(current_position)
-        print("move from: ", current_position)
-        print("move to: ", move_to)
+        from_and_to = self.computer_move_from()
+        print("move from: ", from_and_to[0])
+        print("move to: ", from_and_to[1])
         print("positions: ", self.get_positions())
-        selections = [current_position, move_to]
-        self.move_piece(current_position, move_to)
-        return selections
+        self.move_piece(from_and_to[0], from_and_to[1])
+        return from_and_to
 
     def computer_remove_piece(self):
         player1_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 1]

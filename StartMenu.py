@@ -134,8 +134,6 @@ class StartMenu(tk.Tk):
         new_game_window = GameModes()
 
     def load_game(self):
-        # self.game_functions.load()
-        # open up a boolean data or text file or create one if it doesn't exist and name it load_game.txt
 
         variable_load = open("load_game.txt", "w+")
         variable_load.write('True')

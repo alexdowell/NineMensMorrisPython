@@ -72,31 +72,36 @@ screen = pygame.display.set_mode((600, 750))
 pygame.display.set_caption("Nine Men Morris")
 print("game window initialized")
 # nine mens morris board images (3 mens, 6 mens, 9 mens)
-boardImg3 = pygame.image.load('3mens.png')
-boardImg6 = pygame.image.load('6mens.png')
-boardImg9 = pygame.image.load('dragon9mens.png')
+boardImg3 = pygame.image.load('assets/3mens.png')
+boardImg6 = pygame.image.load('assets/6mens.png')
+boardImg9 = pygame.image.load('assets/dragon9mens.png')
+
+# expand size of 3 mens and 6 mens boards
+boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
+boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
+boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 
 # avatar images
-leafImg = pygame.image.load('player1_30x30.png')
-fireImg = pygame.image.load('player2_30x30.png')
-highImg = pygame.image.load('high.png')
-roboImg = pygame.image.load('robo1.png')
-pantherimg = pygame.image.load('panther.png')
+leafImg = pygame.image.load('assets/player1_30x30.png')
+fireImg = pygame.image.load('assets/player2_30x30.png')
+highImg = pygame.image.load('assets/high.png')
+roboImg = pygame.image.load('assets/robo1.png')
+pantherimg = pygame.image.load('assets/panther.png')
 pantherimg = pygame.transform.scale(pantherimg, (30, 30))
-dragonimg = pygame.image.load('dragon.png')
+dragonimg = pygame.image.load('assets/dragon.png')
 dragonimg = pygame.transform.scale(dragonimg, (30, 30))
 
 # restart button
-restart_button = pygame.image.load('restart.png')
+restart_button = pygame.image.load('assets/restart.png')
 # replay buttons
-play_button = pygame.image.load('play_button.png')
-pause_button = pygame.image.load('pause_button.png')
-rewind_button = pygame.image.load('rewind_button.png')
-fast_forward_button = pygame.image.load('fast_forward_button.png')
-back_button = pygame.image.load('back_button.png')
-replay_button = pygame.image.load('replay_button.png')
-save_button = pygame.image.load('save_button.png')
-load_button = pygame.image.load('load_button.png')
+play_button = pygame.image.load('assets/play_button.png')
+pause_button = pygame.image.load('assets/pause_button.png')
+rewind_button = pygame.image.load('assets/rewind_button.png')
+fast_forward_button = pygame.image.load('assets/fast_forward_button.png')
+back_button = pygame.image.load('assets/back_button.png')
+replay_button = pygame.image.load('assets/replay_button.png')
+save_button = pygame.image.load('assets/save_button.png')
+load_button = pygame.image.load('assets/load_button.png')
 # rduce size of of the replay button images
 play_button = pygame.transform.scale(play_button, (30, 30))
 pause_button = pygame.transform.scale(pause_button, (30, 30))
@@ -108,14 +113,10 @@ save_button = pygame.transform.scale(save_button, (30, 30))
 load_button = pygame.transform.scale(load_button, (30, 30))
 restart_button = pygame.transform.scale(restart_button, (30, 30))
 
-# expand size of 3 mens and 6 mens boards
-boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
-boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
-boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 
 # game mode selection buttons
-single_player = pygame.image.load('single_player.png')
-multi_player = pygame.image.load('multi_player.png')
+single_player = pygame.image.load('assets/single_player.png')
+multi_player = pygame.image.load('assets/multi_player.png')
 single_player = pygame.transform.scale(single_player, (30, 30))
 multi_player = pygame.transform.scale(multi_player, (30, 30))
 
@@ -257,7 +258,8 @@ def draw_board(screen, board_img, positions, coords, replay, play, game_mode_sel
             restart_btn_coord = coords[19]
         elif(board.get_board_size() == 9):
             restart_btn_coord = coords[27]
-        screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
+        if replay == False:
+            screen.blit(restart_button.convert_alpha(), (restart_btn_coord))
 
         # draw the selection buttons
         if game_mode_selection == True:
@@ -397,7 +399,6 @@ def replay_handler(replay_option,log,replay_state,current_state):
             index = 0
             replay_state = index
         state = log[index]
-        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -414,7 +415,6 @@ def replay_handler(replay_option,log,replay_state,current_state):
         print("log length: ", len(log))
         print("index: ", index)
         state = log[index]
-        board.set_board_size(state['board_size'])
         board.set_positions(state['positions'])
         board.set_player_turn(state['player_turn'])
         board.set_active_mills(state['active_mills'])
@@ -424,7 +424,6 @@ def replay_handler(replay_option,log,replay_state,current_state):
     if replay_option == 3: # exit replay button
         #reset current state
         current_state = current_state
-        board.set_board_size(state['board_size'])
         board.set_positions(current_state['positions'])
         board.set_player_turn(current_state['player_turn'])
         board.set_active_mills(current_state['active_mills'])
@@ -464,31 +463,20 @@ def game_loop(variable_load, computer):
                             print("Quit event detected. Closing game window...")
                             running = False
                             break
-                        #print("event.type: ", event.type)
-                        #print("pygame.MOUSEBUTTONUP: ", pygame.MOUSEBUTTONUP)
                         if event.type == pygame.MOUSEBUTTONUP:
                             if replay == True:
                                 for idx, rect in enumerate(replay_clickables):
-                                    # print("the replay clickables are: ", enumerate(replay_coords))
-                                    # print("The idx is: ", idx)
-                                    # print("The rect is: ", rect)
-                                    # print("here replay")
-                                    # print("event.pos: ", event.pos)
                                     if rect.collidepoint(event.pos):
                                         if idx == 0: # rewind a move button
-                                            #print("here rewind")
                                             replay_state = replay_handler(idx, currentstuff[0], replay_state, currentstuff[1])
                                             break
                                         if idx == 1: # play button
-                                            #print("here play")
                                             play_loop = 0
                                             play = True
                                             play_length = len(currentstuff[0])
                                             counter = time.time()
                                             break
-
                                         if idx == 2: # fast forward
-                                            #print("here fast forward")
                                             replay_state = replay_handler(idx  , currentstuff[0], replay_state, currentstuff[1])
                                             break
                                         if idx == 3: # exit replay button
@@ -643,12 +631,6 @@ def game_loop(variable_load, computer):
                         print("event.type: ", event.type)
                         if event.type == pygame.MOUSEBUTTONUP:
                             for idx, rect in enumerate(play_clickables):
-            
-                                # print("the replay clickables are: ", enumerate(replay_coords))
-                                # print("The idx is: ", idx)
-                                # print("The rect is: ", rect)
-                                # print("here1")
-                                # print("event.pos: ", event.pos)
                                 if rect.collidepoint(event.pos):
                                     if idx == 0:
                                         pause = False
@@ -705,6 +687,13 @@ def game_loop(variable_load, computer):
                         if board.player_piece_count() != 3:
                             loop_check = True
                             selections = board.computer_move_piece()
+                            # # exit the program if selections is None
+                            # if computer == 1 and selections != [17,16]:
+                            #     print("still failing!")
+                            #     gameover = True
+                            #     break
+
+
                         if board.player_piece_count() == 3 and (board.get_board_size() == 6 or board.get_board_size() == 9):
                             board.computer_fly_piece() # gotta write the method for this
 
