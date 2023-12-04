@@ -617,10 +617,6 @@ class GUI_State():
                 # check if the game is over or gridlocked (This gameover check only happens in 6 mens or 9 mens morris)
                 if (self.get_board().is_game_over() or self.get_board().is_gridlocked()) and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9) and self.get_board().get_remaining_turns() == 0:
                     self.set_is_gameover(True)
-                else:
-                    print("Game is not over when removing a piece")
-            else:
-                print("Something went wrong when forming a mill")
         # if no piece can be removed, just save to log
         else:
             self.get_board().save_current_state_to_log()
@@ -661,6 +657,7 @@ class GUI_State():
                     self.set_startpos(clicked_pos)
                     print(f"Start position: ", self.get_startpos())
                     print(f"End position (before click): ", self.get_endpos())
+                    return
                 # grab the end position of the player
                 if self.get_endpos() == -1:
                     self.set_endpos(clicked_pos)
@@ -676,45 +673,36 @@ class GUI_State():
                         if self.get_board().form_mill_GUI():
                             # set the check if a piece can be removed to true
                             self.set_can_removepiece(True)
-                            # reset current position of piece flown and end position of piece flown
-                            self.set_startpos(-1)
-                            self.set_endpos(-1)
-                        else:
-                            raise Exception("FLY PIECE PHASE ===> Something went wrong when checking if a mill formed in the GUI")
-                        self.handle_remove_piece(clicked_pos)
-                        # reset current position of piece flown and end position of piece flown
-                        self.set_startpos(-1)
-                        self.set_endpos(-1)
                     else:
                         # reset current position of piece flown and end position of piece flown
                         self.set_startpos(-1)
                         self.set_endpos(-1)
+                        return
                 # start of move piece logic
-                elif self.get_board().move_piece(self.get_startpos(), self.get_endpos()):
+                else:
+                    if self.get_board().move_piece(self.get_startpos(), self.get_endpos()):
                         # check if a moved piece was from a previously formed mill
                         self.get_board().check_remove_active_mill()
                         # check if a mill was formed in the GUI and if it is 6 mens or 9 mens
                         if self.get_board().form_mill_GUI() and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
                             # set the check if a piece can be removed to true
                             self.set_can_removepiece(True)
-                            # reset current position of piece flown and end position of piece flown
-                            self.set_startpos(-1)
-                            self.set_endpos(-1)
                         # check if a mill was formed in the GUI and if it is 3 mens
-                        elif self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
+                        if self.get_board().form_mill_GUI() and self.get_board().get_board_size() == 3:
                             # save the current state to the log and switch turn
                             self.get_board().save_current_state_to_log()
                             # the game is over
                             self.set_is_gameover(True)
-            
-                        self.handle_remove_piece(clicked_pos)
-                        # reset current position of piece flown and end position of piece moved
+                    else:
+                        # reset current position of piece moved and end position of piece moved
                         self.set_startpos(-1)
                         self.set_endpos(-1)
-                else:
-                    # reset current position of piece flown and end position of piece moved
-                    self.set_startpos(-1)
-                    self.set_endpos(-1)
+                        return
+                
+                self.handle_remove_piece(clicked_pos)
+                # reset current position of piece flown and end position of piece flown
+                self.set_startpos(-1)
+                self.set_endpos(-1)
         except Exception as e:
             print(f"Error handling main game click: {e}")
     
@@ -746,12 +734,6 @@ class GUI_State():
                         self.set_can_removepiece(False)
                         self.get_board().check_remove_active_mill()
         self.get_board().save_current_state_to_log()
-
-
-
-                
-            
-
 
 
     def handle_replay_click(self, clicked_pos):
