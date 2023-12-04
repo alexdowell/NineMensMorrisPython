@@ -50,7 +50,7 @@ class Game(Board):
             return False
     # helps the player move a piece on the board. Depending on the board size, the upper limit (or the last position to move a piece changes)
     def move_piece(self, current_position, move_to):
-        upper_limit = None
+        upper_limit = 0
         if(self.get_board_size() == 9):
             upper_limit = 23
         elif(self.get_board_size() == 6):
@@ -58,7 +58,7 @@ class Game(Board):
         elif(self.get_board_size() == 3):
             upper_limit = 8
     
-        print("Upper limit: ", upper_limit)
+        #print("Upper limit: ", upper_limit)
         if 0 <= current_position <= upper_limit and 0 <= move_to <= upper_limit:
             # 1) the current position (the piece the player will move) needs to be occupied
             # 2) the piece needs to be the player's piece
