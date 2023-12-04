@@ -2,7 +2,6 @@ import numbers
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
-from NineMensMorris_Game import Game
 
 
 class GameInstructions:
@@ -43,7 +42,6 @@ class GameInstructions:
 
 class GameModes:
     def __init__(self):
-        self.game = Game()
         self.window = tk.Tk()
         self.window.title("Game Modes")
         self.window.geometry("800x600")
