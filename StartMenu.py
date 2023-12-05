@@ -139,7 +139,7 @@ class StartMenu(tk.Tk):
         variable_load = open("load_game.txt", "w+")
         variable_load.write('True')
 
-        command = ['python', 'NineMensMorris_front_end_computer.py']
+        command = ['python', 'NineMensMorris_GUI.py']
         subprocess.Popen(command)
         print("Starting Human vs Human Game")
 
