@@ -4,7 +4,8 @@ import sys
 import time
 import pygame
 from NineMensMorris_Game import Game
-
+import tkinter as tk
+from tkinter import messagebox
 # Global Variables
 
 # DEBUG - purposes for DEBUGGING
@@ -56,8 +57,8 @@ replay_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'replay
 save_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'save_button.png'), (30, 30))
 load_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'load_button.png'), (30, 30))
 # Game mode selection buttons
-single_player = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'single_player.png'), (30, 30))
-multi_player = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'multi_player.png'), (30, 30))
+human_v_human = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'robo1.png'), (30, 30))
+human_v_comp = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'multi_player.png'), (30, 30))
 
 
 
@@ -112,7 +113,7 @@ class GUI_State():
         self.current_log = []
     
 
-     # Setters
+    # Setters
     
     def set_clickables(self, clickables: list):
         self.clickables = clickables
@@ -152,8 +153,7 @@ class GUI_State():
             'player_turn': self.get_board().get_player_turn(),
             'active_mills': self.get_board().get_active_mills(),
             'remaining_turns': self.get_board().get_remaining_turns(),
-            'permissible_moves': self.get_board().get_permissible_moves(),
-            'game_mode': self.get_board().get_game_mode()
+            'permissible_moves': self.get_board().get_permissible_moves()
         }
         # set the 'log' and 'current_state' as the current log on the front end
         current_log = [log,current_state]
@@ -306,10 +306,8 @@ class GUI_State():
             return self.get_coords()[24], self.get_coords()[25], self.get_coords()[26], self.get_coords()[27]
     
 
-    
-
-
-    # DEBUG LOOP VARIABLES
+    '''
+        # DEBUG LOOP VARIABLES
     def print_loop_variable_statuses(self):
         yes = "yes"
         no = "no"
@@ -327,6 +325,10 @@ class GUI_State():
         print(f"Counter (replay phase): {self.get_counter()}")
         print(f"Replay State (replay phase): {self.get_replay_state()}")
         print(f"Play loop (replay phase): {self.get_play_loop()}")
+    
+    
+    '''
+
 
 
 
@@ -345,8 +347,8 @@ class GUI_State():
             3: (550, 550), # back button
         }
         selection_coords = {
-            1: (23, 550),  # single player
-            2: (170, 550), # multiplayer
+            1: (22, 550),  # single player
+            2: (169, 550), # multiplayer
         }
         self.set_replay_coords(replay_coords)
         self.set_play_coords(play_coords)
@@ -445,7 +447,9 @@ class GUI_State():
             raise Exception("Something went wrong when establishing coordinates for clickables")
         self.set_clickables([pygame.Rect(c[0], c[1], 30, 30) for c in self.get_coords().values()])
         # DEBUG print("Clickables: ", self.get_clickables())
+    
 
+    
     # DEBUG Making sure board is being set properly inside the class
     def printBoardProperties(self):
         print(f"Board Size: {self.get_board().get_board_size()}")
@@ -453,54 +457,51 @@ class GUI_State():
         print(f"Player Turn: {self.get_board().get_player_turn()}")
         print(f"Remaining Turns: {self.get_board().get_remaining_turns()}")
         print(f"Permissible Moves: {self.get_board().get_permissible_moves()}")
-        if(self.get_board().get_game_mode() == 0):
-            print(f"Game Mode: Human v Human")
-        else:
-            print(f"Game Mode: Human v Computer")
-
-
-
-        
+        #if(self.get_board().get_game_mode() == 0):
+           # print(f"Game Mode: Human v Human")
+        #else:
+           # print(f"Game Mode: Human v Computer")
+    
     
     
     # Functions to draw the game state
     def draw_board(self):
         try:
-            # Draw the background board
-            screen.blit(self.get_boardImg().convert(), (0, 0))
+            if not self.get_is_in_game_mode_selection():
+                # Draw the background board
+                screen.blit(self.get_boardImg().convert(), (0, 0))
 
-            # Draw borders around the clickable areas
-            if DEBUG and not (self.get_is_in_replay() and self.get_is_in_play()):
-                clickables_to_draw = self.get_replay_clickables() if self.get_is_in_replay() else self.get_clickables()
-                for rect in clickables_to_draw:
-                    pygame.draw.rect(screen, BLACK, rect, 1)
+                # Draw borders around the clickable areas
+                if DEBUG and not (self.get_is_in_replay() and self.get_is_in_play()):
+                    clickables_to_draw = self.get_replay_clickables() if self.get_is_in_replay() else self.get_clickables()
+                    for rect in clickables_to_draw:
+                        pygame.draw.rect(screen, BLACK, rect, 1)
 
-            # Draw the pieces on the board
-            for pos, value in enumerate(self.get_board().get_positions()):
-                x, y = self.get_coords()[pos]
-                piece_img = None
-                if value == 1:
-                    piece_img = pantherimg.convert_alpha()
-                    screen.blit(piece_img, (x, y))
-                elif value == 2:
-                    piece_img = dragonimg.convert_alpha()
-                    screen.blit(piece_img, (x, y))
+                # Draw the pieces on the board
+                for pos, value in enumerate(self.get_board().get_positions()):
+                    x, y = self.get_coords()[pos]
+                    piece_img = None
+                    if value == 1:
+                        piece_img = pantherimg.convert_alpha()
+                        screen.blit(piece_img, (x, y))
+                    elif value == 2:
+                        piece_img = dragonimg.convert_alpha()
+                        screen.blit(piece_img, (x, y))
 
-            # Highlight selected piece with a green rectangle
-            if self.get_startpos() > -1:
-                x, y = self.get_coords()[self.get_startpos()]
-                pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
+                # Highlight selected piece with a green rectangle
+                if self.get_startpos() > -1:
+                    x, y = self.get_coords()[self.get_startpos()]
+                    pygame.draw.rect(screen, GREEN, (x, y, 30, 30), 3)
+            else:
+                return
 
-
-            # Draw replay and other buttons based on the game state
-            self.draw_buttons()
         except Exception as e:
             print(f"Error drawing the board: {e}")
     
     def draw_buttons(self):
 
         # These buttons will be drawn if the game state is neither in replay or play mode
-        if not (self.get_is_in_replay() or self.get_is_in_play()):
+        if not (self.get_is_in_replay() or self.get_is_in_play() or self.get_is_in_game_mode_selection()):
             replay_button_coord, save_button_coord, load_button_coord, restart_button_coord = self.get_replay_restart_btn_coords()
 
             screen.blit(replay_button.convert_alpha(), replay_button_coord)
@@ -521,18 +522,20 @@ class GUI_State():
         # These buttons will be draw if the game state is in replay and play mode
         elif self.get_is_in_replay() and self.get_is_in_play():
 
-            play_button_coord = self.get_replay_coords()[1]
-            pause_button_coord = self.get_replay_coords()[2]
-            back_button_coord = self.get_replay_coords()[3]
+            play_button_coord = self.get_play_coords()[1]
+            pause_button_coord = self.get_play_coords()[2]
+            back_button_coord = self.get_play_coords()[3]
 
             screen.blit(play_button.convert_alpha(), play_button_coord)
             screen.blit(pause_button.convert_alpha(), pause_button_coord)
             screen.blit(back_button.convert_alpha(), back_button_coord)
 
         # Draw the selection buttons for game mode when game is in game selection mode state
-        elif self.get_is_in_game_mode_selection():
-            screen.blit(single_player.convert_alpha(), (self.get_selection_coords()[1]))
-            screen.blit(multi_player.convert_alpha(), (self.get_selection_coords()[2]))
+        elif self.get_is_in_game_mode_selection() and not (self.get_is_in_replay() or self.get_is_in_play()):
+            human_v_comp_coord = self.get_selection_coords()[1]
+            human_v_human_coord = self.get_selection_coords()[2]
+            screen.blit(human_v_comp.convert_alpha(), human_v_comp_coord)
+            screen.blit(human_v_human.convert_alpha(), human_v_human_coord)
     
     def draw_game_info(self):
         texts = []
@@ -705,7 +708,7 @@ class GUI_State():
                 # check if the game is over or gridlocked (This gameover check only happens in 6 mens or 9 mens morris)
                 if (self.get_board().is_game_over() or self.get_board().is_gridlocked()) and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9) and self.get_board().get_remaining_turns() == 0:
                     self.set_is_gameover(True)
-        # if no piece can be removed, just save to log
+        # if no piece can be removed (aka no mill is formed), just save to log
         else:
             self.get_board().save_current_state_to_log()
             # DEBUG print("Can't remove a piece")
@@ -848,10 +851,7 @@ class GUI_State():
         # save replay state into temp variable
         index = self.get_replay_state()
         if clicked_pos == 0: # rewind a move button
-            if index != 0:
-                index -= 1
-            else:
-                index = 0
+            index = max(0, index - 1)
             # set the previous replay_state to the index of rewind or move forward
             self.set_replay_state(index)
             # go through the log of moves and set the state (Temporary variable) to the replay_state
@@ -859,10 +859,7 @@ class GUI_State():
             # change the visual of the board
             self.change_replay_board_state(state)   
         elif clicked_pos == 2:
-            if index != (len(log)-1): # move forward a move button
-                index += 1
-            else:
-                index = 0
+            index = min(len(log) - 1, index + 1)
             # set the previous replay_state to the index of rewind or move forward
             self.set_replay_state(index)
             # go through the log of moves and set the state (Temporary variable) to the replay_state
@@ -870,6 +867,7 @@ class GUI_State():
             # change the visual of the board
             self.change_replay_board_state(state)   
         elif clicked_pos == 3: # exit replay button
+            self.set_replay_state(0)
             self.change_replay_board_state(current_state)
         else:
             return
@@ -894,18 +892,13 @@ class GUI_State():
     # handles the play mode of replay mode
     def handle_play_events(self, event):
         try:
-            # If the event type is quit, exit
-            if event.type == pygame.QUIT:
-                self.set_is_running(False)
-                return
-            # If the event type is mouse button up, go through play state clickables
-            if event.type == pygame.MOUSEBUTTONUP:
-                for i, rect in enumerate(self.get_play_clickables()):
-                    if rect.collidepoint(event.pos):
-                        self.handle_play_click(i)
-                        break
+            # go through play state clickables
+            for i, rect in enumerate(self.get_play_clickables()):
+                if rect.collidepoint(event.pos):
+                    self.handle_play_click(i)
+                    break
         except Exception as e:
-            print(f"Error handling mouse up events: {e}")
+            print(f"Error handling play events: {e}")
     
     
     
@@ -913,7 +906,6 @@ class GUI_State():
     
     # handles all of the play clickable event clicks
     def handle_play_click(self, clicked_pos):
-        pause_play_loop = 0
         if clicked_pos == 0: # play button
             self.set_is_paused(False)
             self.set_counter(time.time())
@@ -928,9 +920,9 @@ class GUI_State():
             self.set_counter(time.time())
             self.set_is_in_sleep(True)
         
-        # change display according to play loop
-        state = self.get_current_log()[0][self.get_play_loop()]
-        self.change_replay_board_state(state)
+            # change display according to play loop
+            state = self.get_current_log()[0][self.get_play_loop()]
+            self.change_replay_board_state(state)
 
 
         if self.get_is_paused():
@@ -942,16 +934,12 @@ class GUI_State():
     # method that handles game mode selection events
     def handle_game_mode_selection_events(self, event):
         try:
-            if event.type == pygame.QUIT:
-                self.set_is_running(False)
-                return
-            if event.type == pygame.MOUSEBUTTONUP:
-                for i, rect in enumerate(self.get_selection_clickables()):
-                    if rect.collidepoint(event.pos):
-                        self.handle_selection_click(i)
-                        break
+            for i, rect in enumerate(self.get_selection_clickables()):
+                if rect.collidepoint(event.pos):
+                    self.handle_selection_click(i)
+                    break
         except Exception as e:
-            print(f"Error handling mouse up events: {e}")
+            print(f"Error handling selection events: {e}")
     
     # handles the click on the selection clickables (single or multiplayer)
     def handle_selection_click(self, clicked_pos):
@@ -962,17 +950,6 @@ class GUI_State():
             self.get_board().set_game_mode(0)
             self.set_is_in_game_mode_selection(False)
     
-    # method that handles the load game after the start menu
-    def handle_load_game(self):
-        if self.get_is_load():
-            self.get_board().load()
-            variable_load = open("load_game.txt", "w+")
-            variable_load.write('False')
-            variable_load.close()
-
-            self.set_is_load(False)
-            self.set_is_in_game_mode_selection(True)
-
 
     # main game loop
     def game_loop(self):
@@ -986,8 +963,17 @@ class GUI_State():
         while self.get_is_running():
             try:
                 # Event handling
+                # handles game mode selection mode
+                if self.get_is_in_game_mode_selection():
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            # DEBUG print("Quit event detected. Closing game window...")
+                            self.set_is_running(False)
+                            break
+                        elif event.type == pygame.MOUSEBUTTONUP:
+                            self.handle_game_mode_selection_events(event)
                 # if the game state is not in game mode selection mode
-                if not self.get_is_in_game_mode_selection():
+                elif not self.get_is_in_game_mode_selection():
                     # if the game state is not in play mode (this is occurs in replay mode)
                     if not self.get_is_in_play():
                         # go through all events
@@ -998,36 +984,41 @@ class GUI_State():
                                 self.set_is_running(False)
                                 break
                             # if mouse button up, handle all the mouse up button events
-                            if event.type == pygame.MOUSEBUTTONUP:
+                            elif event.type == pygame.MOUSEBUTTONUP:
                                 self.handle_mouse_up_events(event)
                     # if the game state is in play mode (this is occurs in replay mode)
-                    if self.get_is_in_play():
-                        #print("Game is in replay play mode")
-                        self.handle_play_events(pygame.event.get())
-                # handles game mode selection mode
-                if self.get_is_in_game_mode_selection():
-                    print("Game is in game mode selection")
-                    self.handle_game_mode_selection_events(pygame.event.get())
-                # handles computer turn
-                if self.get_board().get_player_turn() == 2 and self.get_board().get_game_mode() == 1:
-                    print("Game is in computer turn mode")
-                    self.handle_computer_turn()
-                # handles load game during gameplay
-                if self.get_is_load():
-                    self.get_board().load()
-                    self.set_is_load(False)
-
+                    elif self.get_is_in_play():
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                            # DEBUG print("Quit event detected. Closing game window...")
+                                self.set_is_running(False)
+                                break
+                            elif event.type == pygame.MOUSEBUTTONUP:
+                                self.handle_play_events(event)
+                    # handles computer turn
+                    if self.get_board().get_player_turn() == 2 and self.get_board().get_game_mode() == 1:
+                        print("Game is in computer turn mode")
+                        self.handle_computer_turn()
+                    # handles load game during gameplay
+                    if self.get_is_load():
+                        self.get_board().load()
+                        self.set_is_load(False)
+                        
+            
                 screen.fill(WHITE)
                 # set the board image
                 self.set_boardImg()
                 # draw the board
                 self.draw_board()
+                # Draw replay and other buttons based on the game state
+                self.draw_buttons()
                 # if sleep (this is for during play mode after the whole sequence of moves is played)
                 if self.get_is_in_sleep():
                     time.sleep(1)
                     self.set_is_in_sleep(False)
-                # draw the prompts for the user
+                    # draw the prompts for the user
                 self.draw_game_info()
+            
                 # update display
                 pygame.display.flip()
                 # set frame rate
@@ -1036,22 +1027,38 @@ class GUI_State():
                 print(f"Error in game loop: {e}")
                 self.set_is_running(False)
                 break
+    
+    
+    '''
+     # method that handles the load game after the start menu
+    def handle_load_game(self, loaded_board: Game):
+        if(loaded_board.load()):
+            self.set_board(loaded_board)
+            self.printBoardProperties()
+            self.setupCoordsForClickables()
+            self.setupCoordsForReplayPlaySelectionClickables()
+            self.set_is_load(False)
+            self.set_is_in_game_mode_selection(True)
+            self.game_loop()
+        else:
+            return
+    '''
+
+
     # setup load game for after the start menu
     def setupLoadGame(self):
         variable_load = ""
-        # Check if the load_game.txt file exists... 
-        load_file_path = "load_game.txt"
-         #...and create it if it doesn't
-        if not os.path.exists(load_file_path):
-            with open(load_file_path, "w+") as variable_load_file:
-                variable_load_file.write('False')
-        # read the file contents
-        with open(load_file_path, "r") as variable_load_file:
-            variable_load = variable_load_file.read()
+
+        if not (os.path.exists('load_game.txt')):
+            with open("load_game.txt", 'w') as file:
+                file.write('False')
+        else:
+            with open("load_game.txt", 'r') as file:
+                variable_load = file.read()
+
         # if file content contains True, then the game is in load mode
         if(variable_load == 'True'):
             self.set_is_load(True)
-        # otherwise continue with setting up a new board entirely
         elif(variable_load == 'False'):
             self.set_is_load(False)
         
@@ -1076,26 +1083,18 @@ def setupBoard():
     return board
 
 
-
 def main():
-    # test if images have been imported correctly
-
-    # GUI_State class instance
+     # GUI_State class instance
     gamestate = GUI_State()
-    # call setup load after start menu
+    # set default loaded game board
+    #loaded_board = Game()
     gamestate.setupLoadGame()
-
-    # if result setup load after start menu is True, handle it
-    if gamestate.get_is_load():
-        gamestate.handle_load_game()
-    # otherwise set up a new board
-    else:
-        gamestate.set_board(setupBoard())
-        gamestate.setupCoordsForClickables()
-        gamestate.setupCoordsForReplayPlaySelectionClickables()
-
+    gamestate.set_board(setupBoard())
+    gamestate.setupCoordsForClickables()
+    gamestate.setupCoordsForReplayPlaySelectionClickables()
     # start game loop
     gamestate.game_loop()
+
 
 # start whole execution of front end
 main()

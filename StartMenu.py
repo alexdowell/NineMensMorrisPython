@@ -1,5 +1,6 @@
 import numbers
 import subprocess
+import os
 import tkinter as tk
 from tkinter import messagebox
 
@@ -136,8 +137,11 @@ class StartMenu(tk.Tk):
         # self.game_functions.load()
         # open up a boolean data or text file or create one if it doesn't exist and name it load_game.txt
 
-        variable_load = open("load_game.txt", "w+")
-        variable_load.write('True')
+        if os.path.exists("load_game.txt"):
+            os.remove("load_game.txt")
+
+        with open("load_game.txt", 'w') as file:
+            file.write('True')
 
         command = ['python', 'NineMensMorris_GUI.py']
         subprocess.Popen(command)

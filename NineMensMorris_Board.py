@@ -2,9 +2,9 @@
 class Board:
     def __init__(self):
         # data member for game mode (human v human or human v computer)
-        self.__game_mode = None
+        self.__game_mode = -1
         # data member for board size
-        self.__board_size = None
+        self.__board_size = 0
         # data member for positions of the board
         self.__positions = []
         # data member for the player turn ('1' for player 1, '2' for player 2)

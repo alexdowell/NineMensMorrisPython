@@ -303,7 +303,7 @@ class Game(Board):
             'player_turn': self.get_player_turn(),
             'active_mills': copy.deepcopy(self.get_active_mills()),
             'remaining_turns': self.get_remaining_turns(),
-            'permissible_moves': self.get_permissible_moves(),
+            'permissible_moves': self.get_permissible_moves()
         }
         # DEBUG print("State before appending to temp_log:", state)  # Debug statement
         self.__temp_log.append(state)
@@ -366,6 +366,7 @@ class Game(Board):
         self.set_active_mills([])
         self.set_initial_remaining_turns()
         self.set_initial_permissible_moves()
+        self.set_game_mode(self.get_game_mode())
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
