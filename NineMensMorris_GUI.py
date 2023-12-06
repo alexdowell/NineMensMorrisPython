@@ -16,6 +16,13 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
+# Define some paths for images
+BOARD_IMG_PATH = 'assets/boardImgs/'
+MODE_BTN_PATH = 'assets/sideBtns/'
+PLAYER_BTN_PATH = 'assets/playerPieces/'
+SIDE_BTN_PATH = 'assets/sideBtns/'
+REPLAY_BTN_PATH = 'assets/replayBtns/'
+
 
 
 # Initialize pygame
@@ -24,37 +31,33 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Arial', 18)
 
 
-
-
 # Set up the screen
 screen = pygame.display.set_mode((600, 750))
 pygame.display.set_caption("Nine Men Morris")
 
 # Load nine mens morris board images
-boardImg3 = pygame.image.load('3mens.png')
-boardImg6 = pygame.image.load('6mens.png')
-boardImg9 = pygame.image.load('dragon9mens.png')
+boardImg3 = pygame.image.load(BOARD_IMG_PATH + '3mens.png')
+boardImg6 = pygame.image.load(BOARD_IMG_PATH + '6mens.png')
+boardImg9 = pygame.image.load(BOARD_IMG_PATH + 'dragon9mens.png')
 
 # Load avatar images
-leafImg = pygame.image.load('player1_30x30.png')
-fireImg = pygame.image.load('player2_30x30.png')
-highImg = pygame.image.load('high.png')
-roboImg = pygame.image.load('robo1.png')
-pantherimg = pygame.image.load('panther.png')
+pantherimg = pygame.image.load(PLAYER_BTN_PATH + 'panther.png')
 pantherimg = pygame.transform.scale(pantherimg, (30, 30))
-dragonimg = pygame.image.load('dragon.png')
+dragonimg = pygame.image.load(PLAYER_BTN_PATH + 'dragon.png')
 dragonimg = pygame.transform.scale(dragonimg, (30, 30))
 
 # Load buttons and adjust sizes
-restart_button = pygame.transform.scale(pygame.image.load('restart.png'), (30, 30))
-play_button = pygame.transform.scale(pygame.image.load('play_button.png'), (30, 30))
-pause_button = pygame.transform.scale(pygame.image.load('pause_button.png'), (30, 30))
-rewind_button = pygame.transform.scale(pygame.image.load('rewind_button.png'), (30, 30))
-fast_forward_button = pygame.transform.scale(pygame.image.load('fast_forward_button.png'), (30, 30))
-back_button = pygame.transform.scale(pygame.image.load('back_button.png'), (30, 30))
-replay_button = pygame.transform.scale(pygame.image.load('replay_button.png'), (30, 30))
-save_button = pygame.transform.scale(pygame.image.load('save_button.png'), (30, 30))
-load_button = pygame.transform.scale(pygame.image.load('load_button.png'), (30, 30))
+
+play_button = pygame.transform.scale(pygame.image.load(REPLAY_BTN_PATH + 'play_button.png'), (30, 30))
+pause_button = pygame.transform.scale(pygame.image.load(REPLAY_BTN_PATH + 'pause_button.png'), (30, 30))
+rewind_button = pygame.transform.scale(pygame.image.load(REPLAY_BTN_PATH +'rewind_button.png'), (30, 30))
+fast_forward_button = pygame.transform.scale(pygame.image.load(REPLAY_BTN_PATH +'fast_forward_button.png'), (30, 30))
+back_button = pygame.transform.scale(pygame.image.load(REPLAY_BTN_PATH +'back_button.png'), (30, 30))
+
+restart_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH +'restart.png'), (30, 30))
+replay_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'replay_button.png'), (30, 30))
+save_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'save_button.png'), (30, 30))
+load_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'load_button.png'), (30, 30))
 
 # Expand the size of 3 mens and 6 mens boards
 boardImg3 = pygame.transform.scale(boardImg3, (500, 500))
@@ -62,8 +65,8 @@ boardImg6 = pygame.transform.scale(boardImg6, (500, 500))
 boardImg9 = pygame.transform.scale(boardImg9, (500, 500))
 
 # Game mode selection buttons
-single_player = pygame.transform.scale(pygame.image.load('single_player.png'), (30, 30))
-multi_player = pygame.transform.scale(pygame.image.load('multi_player.png'), (30, 30))
+single_player = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'single_player.png'), (30, 30))
+multi_player = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'multi_player.png'), (30, 30))
 
 
 class GUI_State():
@@ -1079,6 +1082,8 @@ def setupBoard():
 
 
 def main():
+    # test if images have been imported correctly
+    
     # GUI_State class instance
     gamestate = GUI_State()
     # call setup load after start menu
