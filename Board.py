@@ -574,27 +574,6 @@ class Game_Functions(Board):
         ranchoice = random.choice(player1_positions)
         return ranchoice
 
-    def play_game(self):
-        while not self.is_game_over() and not self.is_gridlocked():
-            # self.print_board()
-
-            if self.get_player_turn() == 1:
-                self.player_turn_actions()
-            else:
-                self.computer_turn_actions()
-
-            self.check_remove_active_mill()
-            self.save_current_state_to_log()
-
-        # self.print_board()
-        # self.print_winner()
-
-    def computer_turn_actions(self):
-        if self.get_remaining_turns() > 0:
-            self.computer_place_piece()
-        else:
-            self.computer_move_piece()
-
     def save_current_state_to_log(self):
         state = {
             'board_size': self.get_board_size(),
