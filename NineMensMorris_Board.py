@@ -85,7 +85,7 @@ class Board:
     def get_permissible_moves(self):
         return self.__permissible_moves
     
-    # Setter for initial permissible moves
+    # Setter for initial permissible moves (depending on the board size it changes)
     def set_initial_permissible_moves(self):
         if(self.get_board_size() == 3):
             self.__permissible_moves = {

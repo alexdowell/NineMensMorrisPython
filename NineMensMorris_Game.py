@@ -4,6 +4,11 @@ import pickle
 import random
 from NineMensMorris_Board import Board
 
+class ComputerPlayer:
+    board = Board()
+    def __init__(self, board):
+        self.board = board
+
 class Game(Board):
     TEMP_LOG_PATH = "temp_log.pkl"
     SAVED_LOG_PATH = "board_log.pkl"

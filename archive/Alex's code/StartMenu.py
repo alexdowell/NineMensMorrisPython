@@ -88,7 +88,7 @@ class GameModes:
         if(isinstance(int(board_size_comm[0]), numbers.Number) and
            (int(board_size_comm[0]) == 3 or int(board_size_comm[0]) == 6 or int(board_size_comm[0]) == 9)):
             # Construct the command to start the game
-            command = ['python', 'NineMensMorris_GUI.py', board_size_comm]
+            command = ['python', 'GUI.py', board_size_comm]
             # Open a subprocess to start the game
             subprocess.Popen(command)
             print("Starting Human vs Human Game")
@@ -106,7 +106,7 @@ class GameModes:
         if(isinstance(int(board_size_comm[0]), numbers.Number) and
            (int(board_size_comm[0]) == 3 or int(board_size_comm[0]) == 6 or int(board_size_comm[0]) == 9)):
             # Construct the command to start the game
-            command = ['python', 'NineMensMorris_GUI.py', board_size_comm]
+            command = ['python', 'GUI.py', board_size_comm]
             # Open a subprocess to start the game
             subprocess.Popen(command)
             print("Starting Human vs Computer Game")
@@ -167,7 +167,7 @@ class StartMenu(tk.Tk):
         variable_load.write('True')
 
         # Construct the command to start the game
-        command = ['python', 'NineMensMorris_GUI.py']
+        command = ['python', 'GUI.py']
         # Open a subprocess to start the game
         subprocess.Popen(command)
         print("Starting Human vs Human Game")
