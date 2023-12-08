@@ -1,6 +1,6 @@
 class Board:
     def __init__(self):
-        self.__board_size = None
+        self.__board_size = 0
         self.__positions = []
         self.__player_turn = 1
         self.__active_mills = []

@@ -31,7 +31,6 @@ pygame.init()
 pygame.font.init()
 myfont = pygame.font.SysFont('Arial', 18)
 
-
 # Set up the screen
 screen = pygame.display.set_mode((600, 750))
 pygame.display.set_caption("Nine Men Morris")
@@ -58,8 +57,8 @@ replay_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'replay
 save_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'save_button.png'), (30, 30))
 load_button = pygame.transform.scale(pygame.image.load(SIDE_BTN_PATH + 'load_button.png'), (30, 30))
 # Game mode selection buttons
-human_v_human = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'robo1.png'), (30, 30))
-human_v_comp = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'multi_player.png'), (30, 30))
+human_v_comp = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'robo1.png'), (30, 30))
+human_v_human = pygame.transform.scale(pygame.image.load(MODE_BTN_PATH + 'multi_player.png'), (30, 30))
 
 
 
@@ -277,35 +276,6 @@ class GUI_State():
         elif self.get_board().get_board_size() == 9:
             return self.get_coords()[24], self.get_coords()[25], self.get_coords()[26], self.get_coords()[27]
     
-
-    '''
-        # DEBUG LOOP VARIABLES
-    def print_loop_variable_statuses(self):
-        yes = "yes"
-        no = "no"
-        print(f"Is In Load Mode: {yes if self.get_is_load() else no}")
-        print(f"Is In Game Selection Mode: {yes if self.get_is_in_game_mode_selection() else no}")
-        print(f"Is In Sleep: {yes if self.get_is_in_sleep() else no}")
-        print(f"Is In Play (within Replay Mode): {yes if self.get_is_in_play() else no}")
-        print(f"Is In Replay Mode: {yes if self.get_is_in_replay() else no}")
-        print(f"Is In Pause Mode: {yes if self.get_is_paused() else no}")
-        print(f"Is Gameover?: {yes if self.get_is_gameover() else no}")
-        print(f"Can remove a piece?: {yes if self.get_can_removepiece() else no}")
-        print(f"Start position (move/fly phase): {self.get_startpos()}")
-        print(f"End position (move/fly phase): {self.get_endpos()}")
-        print(f"Play length (replay phase): {self.get_play_length()}")
-        print(f"Counter (replay phase): {self.get_counter()}")
-        print(f"Replay State (replay phase): {self.get_replay_state()}")
-        print(f"Play loop (replay phase): {self.get_play_loop()}")
-    
-    
-    '''
-
-
-
-
-    
-    
     def setup_coords_for_replay_play_selection_clickables(self):
         replay_coords = {
             1: (22, 550),  # rewind a move button
@@ -326,20 +296,10 @@ class GUI_State():
         self.set_play_coords(play_coords)
         self.set_selection_coords(selection_coords)
 
-        # DEBUG
-        #print("Replay Coords: ", self.get_replay_coords())
-        #print("Play Coords: ", self.get_play_coords())
-        #print("Selection Coords: ", self.get_selection_coords())
-
 
         self.set_replay_clickables([pygame.Rect(c[0], c[1], 30, 30) for c in self.get_replay_coords().values()])
         self.set_play_clickables([pygame.Rect(c[0], c[1], 30, 30) for c in self.get_play_coords().values()])
         self.set_selection_clickables([pygame.Rect(c[0], c[1], 30, 30) for c in self.get_selection_coords().values()])
-
-        # DEBUG
-        #print("Replay Clickables: ", self.get_replay_clickables())
-        #print("Play Clickables: ", self.get_play_clickables())
-        #print("Selection Clickables: ", self.get_selection_clickables())
 
 
         
@@ -423,16 +383,16 @@ class GUI_State():
 
     
     # DEBUG Making sure board is being set properly inside the class
-    def printBoardProperties(self):
+    '''
+        def printBoardProperties(self):
         print(f"Board Size: {self.get_board().get_board_size()}")
         print(f"Positions: {self.get_board().get_positions()}")
         print(f"Player Turn: {self.get_board().get_player_turn()}")
         print(f"Remaining Turns: {self.get_board().get_remaining_turns()}")
         print(f"Permissible Moves: {self.get_board().get_permissible_moves()}")
-        #if(self.get_board().get_game_mode() == 0):
-           # print(f"Game Mode: Human v Human")
-        #else:
-           # print(f"Game Mode: Human v Computer")
+    
+    '''
+
     
     
     
@@ -512,6 +472,7 @@ class GUI_State():
     def draw_game_info(self):
         texts = []
         gridlocked = self.get_board().is_gridlocked()
+        enemy_bot = "ENEMY BOT"
 
         # These statements will print on the window when the game is over
         if self.get_is_gameover():
@@ -520,16 +481,29 @@ class GUI_State():
                 texts = ["In Replay Mode"]
             # if not replay, then these statements will be printed if the either player is gridlocked
             elif gridlocked:
-                texts = [
-                    f"Player {1 if self.get_board().get_player_turn() == 1 else 2} is gridlocked! Player {2 if self.get_board().get_player_turn() == 2 else 1} wins!",
-                    "Close window to change game settings or click Restart"
-                ]
+                if self.get_board().get_game_mode() == 0: # human v human game
+
+                    texts = [
+                        f"Player {1 if self.get_board().get_player_turn() == 1 else 2} is gridlocked! Player {2 if self.get_board().get_player_turn() == 2 else 1} wins!",
+                        "Close window to change game settings or click Restart"
+                    ]
+                elif self.get_board().get_game_mode() == 1: # human v computer game
+                    texts = [
+                        f"Game Over! Player {1 if self.get_board().get_player_turn() == 1 else enemy_bot} wins!",
+                        "Close window to change game settings or click Restart"
+                    ]
             # otherwise, these statements will be printed whenever the game is over 
             else:
-                texts = [
-                    f"Game Over! Player {1 if self.get_board().get_player_turn() == 1 else 2} wins!",
-                    "Close window to change game settings or click Restart"
-                ]
+                if self.get_board().get_game_mode() == 0: # human v human game
+                    texts = [
+                        f"Game Over! Player {1 if self.get_board().get_player_turn() == 1 else 2} wins!",
+                        "Close window to change game settings or click Restart"
+                    ]
+                elif self.get_board().get_game_mode() == 1: # human v computer game
+                    texts = [
+                        f"Game Over! Player {1 if self.get_board().get_player_turn() == 1 else enemy_bot} wins!",
+                        "Close window to change game settings or click Restart"
+                    ]
         # These statements will print when the game is not over or if it is not in game selection mode
         elif not (self.get_is_gameover() or self.get_is_in_game_mode_selection()):
             # During the place piece phase
@@ -545,10 +519,17 @@ class GUI_State():
                     texts = ["In Replay Mode"]
                 # Otherwise, these statements will be printed, which prints who turn it is and how many total turns are left
                 else:
-                    texts = [
-                        f"It's Player {1 if self.get_board().get_player_turn() == 1 else 2}'s turn!",
-                        f"Remaining Turns: {self.get_board().get_remaining_turns()}"
-                    ]
+                    if self.get_board().get_game_mode() == 0:
+                        texts = [
+                            f"It's Player {1 if self.get_board().get_player_turn() == 1 else 2}'s turn!",
+                            f"Remaining Turns: {self.get_board().get_remaining_turns()}"
+                        ]
+                    elif self.get_board().get_game_mode() == 1:
+                        texts = [
+                            f"It's Player {1 if self.get_board().get_player_turn() == 1 else enemy_bot}'s turn!",
+                            f"Remaining Turns: {self.get_board().get_remaining_turns()}"
+                        ]
+
             # During move/fly piece phase
             elif self.get_board().get_remaining_turns() == 0:
                 # If the player forms a mill and can remove a piece, these statements will be printed
@@ -839,6 +820,7 @@ class GUI_State():
     def replay_handler(self, clicked_pos, log, current_state):
         # save replay state into temp variable
         index = self.get_replay_state()
+        replay_state = 0
         if log is None or current_state is None:
             print("Error: Log or current state is None")
             return
@@ -846,28 +828,31 @@ class GUI_State():
         if clicked_pos == 0: # rewind a move button
             if index != 0:
                 index -= 1
-                self.set_replay_state(index)
+                replay_state = index
             else:
                 index = 0
-                self.set_replay_state(index)
+                replay_state = index
             # go through the log of moves and set the state (Temporary variable) to the replay_state
-            state = log[self.get_replay_state()]
+            state = log[index]
             # change the visual of the board
-            self.change_replay_board_state(state)   
+            self.change_replay_board_state(state)
+            return replay_state   
         elif clicked_pos == 2:
             if index != (len(log) - 1):
                 index += 1
-                self.set_replay_state(index)
+                replay_state = index
             else:
                 index = 0
-                self.set_replay_state(index)
+                replay_state = index
             # go through the log of moves and set the state (Temporary variable) to the replay_state
-            state = log[self.get_replay_state()]
+            state = log[index]
             # change the visual of the board
-            self.change_replay_board_state(state)   
+            self.change_replay_board_state(state)
+            return replay_state   
         elif clicked_pos == 3: # exit play button
-            self.set_replay_state(0)
+            replay_state = 0
             self.change_replay_board_state(current_state)
+            return replay_state
         else:
             return
             
@@ -876,7 +861,7 @@ class GUI_State():
     # handle all the clicks of the replay buttons
     def handle_replay_click(self, clicked_pos):
         if clicked_pos == 0 or clicked_pos == 2: # rewind/forward a move button
-            self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1])
+            self.set_replay_state(self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1]))
         elif clicked_pos == 1: # play button (This will trigger handle_play_events() method)
             self.set_play_loop(0)
             self.set_is_in_play(True)
@@ -884,7 +869,7 @@ class GUI_State():
             self.set_counter(time.time())
         elif clicked_pos == 3: # exit replay
             # reset the state of the board to be the current state before exiting replay mode
-            self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1])
+            self.set_replay_state(self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1]))
             self.set_is_in_replay(False)
         
         
@@ -939,10 +924,11 @@ class GUI_State():
         # when game is in play
         elif self.get_is_paused() == False:
             self.set_play_loop(round( time.time() - self.get_counter()))
+            self.set_is_in_sleep(True)
 
 
-            #print("Play loop: ", self.get_play_loop())
-            #sys.exit()
+        #print("Play loop: ", self.get_play_loop())
+        #sys.exit()
         
         # change display according to play loop
         #print("Board Positions: ", self.get_board().get_positions())
@@ -969,10 +955,10 @@ class GUI_State():
     # handles the click on the selection clickables (single or multiplayer)
     def handle_selection_click(self, clicked_pos):
         if clicked_pos == 0: 
-            self.get_board().set_game_mode(0) # multiplayer (human v human)
+            self.get_board().set_game_mode(1) # single player (human v computer)
             self.set_is_in_game_mode_selection(False)
         elif clicked_pos == 1:  
-            self.get_board().set_game_mode(1) # single player (human v computer)
+            self.get_board().set_game_mode(0) # multi player (human v human)
             self.set_is_in_game_mode_selection(False)
     
 
@@ -1082,6 +1068,7 @@ class GUI_State():
         fileWriter = open(LOAD_VAR_PATH, "w")
         fileWriter.write('False')
         fileWriter.close()
+        
         board = Game()
         self.set_board(board)
         self.get_board().load()

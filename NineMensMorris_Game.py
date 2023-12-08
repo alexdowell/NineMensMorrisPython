@@ -176,16 +176,6 @@ class Game(Board):
                     return True 
         return False
 
-    # def opposite_player_turn(self):
-    #     if self.get_player_turn() == 1:
-    #         return 2
-    #     else:
-    #         return 1
-
-    def opposite_player_turn(self):
-        if not self.get_player_turn() == 1:
-            self.computer_place_piece()
-
     def check_remove_active_mill(self):
         mills_to_remove = []
 
