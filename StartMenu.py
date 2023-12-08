@@ -3,6 +3,7 @@ import numbers
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
+import os
 
 # Class for displaying game instructions
 class GameInstructions:
@@ -163,8 +164,20 @@ class StartMenu(tk.Tk):
 
     # Method to load a saved game
     def load_game(self):
-        variable_load = open("load_game.txt", "w+")
-        variable_load.write('True')
+        file_path = "load_game.txt"
+        with open(file_path, "r") as file:
+            file_content = file.read()
+        
+        old_text = 'False'
+        new_text = 'True'
+
+        file_content = file_content.replace(old_text, new_text)
+
+        with open(file_path, "w") as file:
+            file.write(file_content)
+        
+
+        print(f"File '{file_path}' has been updated.")
 
         # Construct the command to start the game
         command = ['python', 'NineMensMorris_GUI.py']
@@ -175,4 +188,7 @@ class StartMenu(tk.Tk):
 # Main block to run the application
 if __name__ == "__main__":
     app = StartMenu()
+    if not os.path.exists("load_game.txt"):
+        with open("load_game.txt", "w") as file:
+            file.write("False")
     app.mainloop()
