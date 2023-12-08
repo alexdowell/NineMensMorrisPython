@@ -577,7 +577,7 @@ class Game_Functions(Board):
         player1_positions = [pos for pos, player in enumerate(self.get_positions()) if player == 1]
         ranchoice = random.choice(player1_positions)
         return ranchoice
-
+    
     def play_game(self):
         while not self.is_game_over() and not self.is_gridlocked():
             # self.print_board()
@@ -673,4 +673,3 @@ class Game_Functions(Board):
         if os.path.exists(self.TEMP_LOG_PATH):
             os.remove(self.TEMP_LOG_PATH)
         self.__temp_log = []  # clear the in-memory log
-

@@ -5,7 +5,7 @@ import time
 
 import pygame
 
-from Board import Game_Functions as Game_Functions
+from Board_alex import Game_Functions as Game_Functions
 
 DEBUG = False
 
