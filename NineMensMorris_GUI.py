@@ -939,7 +939,6 @@ class GUI_State():
         # when game is in play
         elif self.get_is_paused() == False:
             self.set_play_loop(round( time.time() - self.get_counter()))
-            self.set_is_in_sleep(True)
 
 
             #print("Play loop: ", self.get_play_loop())
@@ -1058,13 +1057,14 @@ class GUI_State():
                 self.draw_board()
                 # if sleep (this is for during play mode after the whole sequence of moves is played)
                 print("Play loop (Counter): ", self.get_play_loop())
-                if self.get_is_in_sleep():
-                    time.sleep(1)
-                    self.set_is_in_sleep(False)
                 # Draw replay and other buttons based on the game state
                 self.draw_buttons()
                 # draw the prompts for the user
                 self.draw_game_info()
+
+                if self.get_is_in_sleep() == True:
+                    time.sleep(1)
+                    self.set_is_in_sleep(False)
             
                 # update display
                 pygame.display.flip()
