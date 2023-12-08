@@ -110,11 +110,12 @@ class GUI_State():
         self.play_clickables = []
         self.replay_clickables = [] 
         self.clickables = []
-        # current log that is saved in the back end
-        self.current_log = []
     
 
     # Setters
+
+    def set_current_log_GUI(self, current_log_GUI):
+        self.current_log_GUI = current_log_GUI
     
     def set_clickables(self, clickables: list):
         self.clickables = clickables
@@ -130,36 +131,6 @@ class GUI_State():
 
     def set_selection_coords(self, selection_coords: dict):
         self.selection_coords = selection_coords
-
-    def set_current_log(self):
-        TEMP_LOG_PATH = 'temp_log.pkl'
-        # check if the temp log file (which has all the moves done up until this point) exists
-        # if not, there are no moves to be replayed
-        if not os.path.exists(TEMP_LOG_PATH):
-            print("No saved game states to replay.")
-            return
-        
-        # extract the log from the temp pickle log
-        with open(TEMP_LOG_PATH, "rb") as file:
-            log = pickle.load(file)
-        
-        # in case the log is empty, return from function since there is nothing to be replayed
-        if not log:
-            print("Log is empty. nothing to replay")
-            return
-        # get current state from the backend
-        current_state = {
-            'board_size': self.get_board().get_board_size(),
-            'positions': self.get_board().get_positions(),
-            'player_turn': self.get_board().get_player_turn(),
-            'active_mills': self.get_board().get_active_mills(),
-            'remaining_turns': self.get_board().get_remaining_turns(),
-            'permissible_moves': self.get_board().get_permissible_moves()
-        }
-
-        # set the 'log' and 'current_state' as the current log on the front end
-        current_log = [log,current_state]
-        self.current_log = current_log
 
     def set_play_coords(self, play_coords: dict):
         self.play_coords = play_coords
@@ -226,6 +197,8 @@ class GUI_State():
         self.play_loop = play_loop
 
     # Getters
+    def get_current_log_GUI(self):
+        return self.current_log_GUI
     def get_clickables(self):
         return self.clickables
     def get_selection_clickables(self):
@@ -240,9 +213,6 @@ class GUI_State():
         return self.play_coords
     def get_replay_coords(self):
         return self.replay_coords
-    
-    def get_current_log(self):
-        return self.current_log
     
     def get_coords(self):
         return self.coords
@@ -336,7 +306,7 @@ class GUI_State():
 
     
     
-    def setupCoordsForReplayPlaySelectionClickables(self):
+    def setup_coords_for_replay_play_selection_clickables(self):
         replay_coords = {
             1: (22, 550),  # rewind a move button
             2: (169, 550), # play button
@@ -374,7 +344,7 @@ class GUI_State():
 
         
 
-    def setupCoordsForClickables(self):
+    def setup_coords_for_clickables(self):
         if(self.get_board().get_board_size() == 9):
             self.set_coords({
                 0: (22, 22), # positions 0-23 are the 24 positions on the board
@@ -638,12 +608,13 @@ class GUI_State():
     Depending on the size of the board, the position of where the button is will change hence the different values being compard to
     clicked_pos
     '''
+
     def handle_side_btn_click(self, clicked_pos):
         if self.get_board().get_board_size() == 9:
             # Replay
             if clicked_pos == 24:
                 self.set_is_in_replay(True)
-                self.set_current_log()
+                self.set_current_log_GUI(self.get_current_state_and_log())
             # Save
             elif(clicked_pos == 25):
                 self.get_board().save()
@@ -660,7 +631,7 @@ class GUI_State():
             # Replay
             if(clicked_pos == 16):
                 self.set_is_in_replay(True)
-                self.set_current_log()
+                self.set_current_log_GUI(self.get_current_state_and_log())
             # Save
             elif(clicked_pos == 17):
                 self.get_board().save()
@@ -677,7 +648,7 @@ class GUI_State():
             # Replay
             if(clicked_pos == 9):
                 self.set_is_in_replay(True)
-                self.set_current_log()
+                self.set_current_log_GUI(self.get_current_state_and_log())
             # Save
             elif(clicked_pos == 10):
                 self.get_board().save()
@@ -805,6 +776,7 @@ class GUI_State():
     #This method is called when the game mode is human v computer and handles the computer placement, movement, and flying
 
     def handle_computer_turn(self):
+        selections = [0, 0]
         # initialize computer remove piece position to 0
         remove_piece = 0
         # place piece phase
@@ -824,7 +796,7 @@ class GUI_State():
         elif(self.get_board().get_remaining_turns() == 0):
             # if the computer player has more than 3 pieces left on the board, they can only move pieces
             if self.get_board().player_piece_count() != 3:
-                self.get_board().computer_move_piece()
+                selections = self.get_board().computer_move_piece()
             # if the computer player has only 3 pieces left on the board (in 9 mens and 6 mens morris), then they can fly pieces
             elif self.get_board().player_piece_count() == 3 and (self.get_board().get_board_size() == 6 or self.get_board().get_board_size() == 9):
                 self.get_board().computer_fly_piece()
@@ -840,29 +812,60 @@ class GUI_State():
  
         self.handle_remove_piece(remove_piece)
     
-    
+    def get_current_state_and_log(self):
+        if not os.path.exists(TEMP_LOG_PATH):
+            print("No saved game states to replay.")
+            return
+        with open(TEMP_LOG_PATH, "rb") as file:
+            log = pickle.load(file)
+        
+        if not log:
+            print("Log is empty. Nothing to replay.")
+            return
+        
+         # Save current state
+        current_state = {
+            'board_size': self.get_board().get_board_size(),
+            'positions': self.get_board().get_positions(),
+            'player_turn': self.get_board().get_player_turn(),
+            'active_mills': self.get_board().get_active_mills(),
+            'remaining_turns': self.get_board().get_remaining_turns(),
+            'permissible_moves': self.get_board().get_permissible_moves(),
+        }
+        current_state_and_log = [log, current_state]
+        return current_state_and_log
     
     # method helps with rewinding a move and moving forward a move in replay mode
     def replay_handler(self, clicked_pos, log, current_state):
         # save replay state into temp variable
         index = self.get_replay_state()
+        if log is None or current_state is None:
+            print("Error: Log or current state is None")
+            return
+        
         if clicked_pos == 0: # rewind a move button
-            index = max(0, index - 1)
-            # set the previous replay_state to the index of rewind or move forward
-            self.set_replay_state(index)
+            if index != 0:
+                index -= 1
+                self.set_replay_state(index)
+            else:
+                index = 0
+                self.set_replay_state(index)
             # go through the log of moves and set the state (Temporary variable) to the replay_state
             state = log[self.get_replay_state()]
             # change the visual of the board
             self.change_replay_board_state(state)   
         elif clicked_pos == 2:
-            index = min(len(log) - 1, index + 1)
-            # set the previous replay_state to the index of rewind or move forward
-            self.set_replay_state(index)
+            if index != (len(log) - 1):
+                index += 1
+                self.set_replay_state(index)
+            else:
+                index = 0
+                self.set_replay_state(index)
             # go through the log of moves and set the state (Temporary variable) to the replay_state
             state = log[self.get_replay_state()]
             # change the visual of the board
             self.change_replay_board_state(state)   
-        elif clicked_pos == 3: # exit replay button
+        elif clicked_pos == 3: # exit play button
             self.set_replay_state(0)
             self.change_replay_board_state(current_state)
         else:
@@ -873,20 +876,15 @@ class GUI_State():
     # handle all the clicks of the replay buttons
     def handle_replay_click(self, clicked_pos):
         if clicked_pos == 0 or clicked_pos == 2: # rewind/forward a move button
-            self.replay_handler(clicked_pos, self.get_current_log()[0], self.get_current_log()[1])
+            self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1])
         elif clicked_pos == 1: # play button (This will trigger handle_play_events() method)
             self.set_play_loop(0)
             self.set_is_in_play(True)
-            self.set_play_length(len(self.get_current_log()[0]))
-            #self.set_counter(time.time())
-            #print("Play Loop (where play loop starts): ", self.get_play_loop())
-            #print("Game is in play mode: ", self.get_is_in_play())
-            #print("Play Length (where play loop end): ", self.get_play_length())
-            #print("Counter: ", self.get_counter())
-            #sys.exit()
+            self.set_play_length(len(self.get_current_log_GUI()[0]))
+            self.set_counter(time.time())
         elif clicked_pos == 3: # exit replay
             # reset the state of the board to be the current state before exiting replay mode
-            self.replay_handler(clicked_pos, self.get_current_log()[0], self.get_current_log()[1])
+            self.replay_handler(clicked_pos, self.get_current_log_GUI()[0], self.get_current_log_GUI()[1])
             self.set_is_in_replay(False)
         
         
@@ -928,14 +926,18 @@ class GUI_State():
         # play loop is 0
         # play length is length of temp log - 1
         if self.get_play_loop() == (self.get_play_length()-1):
-            #self.set_counter(time.time())
+            self.set_counter(time.time())
             self.set_is_in_sleep(True)
         
+        state = self.get_current_log_GUI()[0][self.get_play_loop()]
+
+        self.change_replay_board_state(state)
+        
         # when game is in pause
-        if self.get_is_paused():
+        if self.get_is_paused() == True:
             self.set_play_loop(pause_play_loop)
         # when game is in play
-        elif not self.get_is_paused():
+        elif self.get_is_paused() == False:
             self.set_play_loop(round( time.time() - self.get_counter()))
             self.set_is_in_sleep(True)
 
@@ -949,9 +951,7 @@ class GUI_State():
         #print("Current log[0][0]: ", self.get_current_log()[0][0])
         #sys.exit()
         #print("State: ", self.get_current_log()[0][self.get_play_loop()])
-        state = self.get_current_log()[0][self.get_play_loop()]
-
-        self.change_replay_board_state(state)
+        
 
         #print("Current log: ", self.get_current_log())
         #print("State: ", state)
@@ -1005,8 +1005,8 @@ class GUI_State():
                     # handles load game during gameplay
                     if self.get_is_load():
                         self.get_board().load()
-                        self.setupCoordsForClickables()
-                        self.setupCoordsForReplayPlaySelectionClickables()
+                        self.setup_coords_for_clickables()
+                        self.setup_coords_for_replay_play_selection_clickables()
 
                         if os.path.exists(LOAD_VAR_PATH):
                             os.remove(LOAD_VAR_PATH)
@@ -1085,8 +1085,8 @@ class GUI_State():
         board = Game()
         self.set_board(board)
         self.get_board().load()
-        self.setupCoordsForClickables()
-        self.setupCoordsForReplayPlaySelectionClickables()
+        self.setup_coords_for_clickables()
+        self.setup_coords_for_replay_play_selection_clickables()
         self.set_is_in_game_mode_selection(True)
         self.set_is_load(False)
 
@@ -1132,8 +1132,8 @@ def main():
         gamestate.game_loop()
     else:
         gamestate.set_board(setupBoard())
-        gamestate.setupCoordsForClickables()
-        gamestate.setupCoordsForReplayPlaySelectionClickables()
+        gamestate.setup_coords_for_clickables()
+        gamestate.setup_coords_for_replay_play_selection_clickables()
         # start game loop
         gamestate.game_loop()
 # start whole execution of front end
