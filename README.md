@@ -17,13 +17,13 @@ This project implements a digital version of the classic board game **Nine Men's
 ### Prerequisites
 Ensure you have Python installed along with the necessary dependencies:
 ```sh
-pip install -r requirements.txt
+pip install -r requirements.txt```
 
 ## Running the Game
 Execute the following command to start the game:
 
 ```sh
-python NineMensMorris_GUI.py
+python NineMensMorris_GUI.py```
 
 ## File Structure
 - **NineMensMorris_GUI.py** → Handles the graphical user interface.
